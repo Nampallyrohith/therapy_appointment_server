@@ -1,0 +1,40 @@
+{
+  "name": "therapy-appointment-server",
+  "version": "1.0.0",
+  "main": "./dist/server.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc-watch --onSuccess \"node ./dist/server.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nampallyrohith/therapy_appointment_server.git"
+  },
+  "author": "Rohith Nampally",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nampallyrohith/therapy_appointment_server/issues"
+  },
+  "homepage": "https://github.com/Nampallyrohith/therapy_appointment_server#readme",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
+    "path": "^0.12.7",
+    "pg": "^8.13.1",
+    "tsc-watch": "^6.2.1",
+    "url": "^0.11.4",
+    "uuid": "^11.0.3",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.3",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.2"
+  }
+}
