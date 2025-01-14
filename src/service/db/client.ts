@@ -1,13 +1,14 @@
 import pkg from "pg";
+import env from "../../config.js";
 
 const { Client } = pkg;
 
 export const client = new Client({
-  host: "localhost",
-  user: "postgres",
-  port: 5432,
-  password: "mysecretpassword",
-  database: "postgres",
+  host: env.DBHOST,
+  user: env.DBUSER,
+  port: env.DBPORT,
+  password: env.DBPASS,
+  database: env.DBNAME,
 });
 
 await client.connect();
