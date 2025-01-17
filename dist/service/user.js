@@ -1,10 +1,13 @@
 import { client } from "./db/client.js";
 import bcrypt from "bcrypt";
 import { QUERIES } from "./db/queries.js";
-import { DatabaseError, UserAlreadyExistsError } from "./errors.js";
+import { DatabaseError, NotFoundError, PasswordNotMatch, UserAlreadyExistsError, } from "./errors.js";
+import env from "../config.js";
+import jwt from "jsonwebtoken";
 export const getUserByEmail = async (email) => {
-    const response = await client.query(QUERIES.getUserByEmail, [email]);
-    return response.rows[0];
+    const response = await (await client.query(QUERIES.getUserByEmail, [email])).rows[0];
+    console.log(response);
+    return response;
 };
 export const createUser = async (fullName, email, password) => {
     const userExists = await getUserByEmail(email);
@@ -18,4 +21,21 @@ export const createUser = async (fullName, email, password) => {
     catch (error) {
         throw new DatabaseError("Error creating user");
     }
+};
+export const loginUser = async (email, password) => {
+    const user = await getUserByEmail(email);
+    if (!user) {
+        throw new NotFoundError("User doesn't exist. Please create an account.");
+    }
+    const response = await bcrypt.compare(password, user.password);
+    if (!response) {
+        throw new PasswordNotMatch("Password doesn't match");
+    }
+    const token = jwt.sign({ id: user.id, email: user.email }, env.SECRET_KEY, {
+        expiresIn: "1h",
+    });
+    return {
+        token,
+        user: { id: user.id, email: user.email, fullName: user.full_name },
+    };
 };

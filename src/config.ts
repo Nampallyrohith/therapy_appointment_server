@@ -20,9 +20,9 @@ const baseConfigSchema = z.object({
   DBUSER: z.string().min(1),
   DBPASS: z.string().min(1),
   DBNAME: z.string().min(1),
+  SECRET_KEY: z.string().min(1),
 });
 
+const env = baseConfigSchema.parse(process.env);
 
-const env = baseConfigSchema.parse(process.env)
-
-export default env
+export default env;
