@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { loginSchema, signupSchema } from "../schema/user.js";
-import { createUser, loginUser } from "../service/user.js";
-import { DatabaseError, NotFoundError, PasswordNotMatch, UserAlreadyExistsError, } from "../service/errors.js";
+import { loginSchema, signupSchema, UserSchema, } from "../schema/user.js";
+import { createUser, insertUserDetails, loginUser } from "../services/user.js";
+import { DatabaseError, NotFoundError, PasswordNotMatch, UserAlreadyExistsError, } from "../services/errors.js";
 export const defineRoute = (handler) => handler;
 const router = Router();
 // Define routes
@@ -44,4 +44,35 @@ router.post("/login", defineRoute(async (req, res) => {
         res.status(500).send({ message: "Internal Server Error" });
     }
 }));
+router.post("/auth/google/signin", defineRoute(async (req, res) => {
+    try {
+        const user = UserSchema.parse(req.body);
+        console.log(user);
+        await insertUserDetails(user);
+        res.status(200).send({ message: "User created successfully" });
+    }
+    catch (error) { }
+}));
+// router.post(
+//   "/auth/google/signin",
+//   defineRoute(async (req, res) => {
+//     try {
+//       const { credentials } = googleAuthSchema.parse(req.body);
+//       console.log("credentials", credentials);
+//       const userDetails = await googleAuthentication(credentials);
+//       res.json({ message: "Authentication successful", user: userDetails });
+//     } catch (error) {
+//       if (error instanceof InvalidToken) {
+//         res.status(400).send({
+//           message: "Invalid credential token while verifying with google.",
+//         });
+//       }
+//       if (error instanceof ExchangeTokenError) {
+//         res.status(400).send({ message: "Failed to exchange token" });
+//       }
+//       console.error("error:---",error);
+//       res.status(500).send({ message: error });
+//     }
+//   })
+// );
 export default router;

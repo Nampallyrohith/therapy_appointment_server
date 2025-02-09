@@ -1,11 +1,17 @@
 import express from "express";
-import { connectAndQuery } from "./service/db/client.js";
+import { connectAndQuery } from "./services/db/client.js";
 import env from "./config.js";
+import cors from "cors";
 import routes from "./handlers/routes.js";
 
 const app = express();
 
 const PORT = env.PORT;
+const corsOptions = {
+  origin: env.CORS_ALLOWED_ORIGIN as string, // Read from .env or use default
+  credentials: true, // Allow cookies
+};
+app.use(cors(corsOptions));
 
 app.use(express.json());
 

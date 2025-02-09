@@ -10,3 +10,25 @@ export const signupSchema = authenicationSchema.extend({
 });
 
 export const loginSchema = authenicationSchema.extend({});
+
+export const googleAuthSchema = z.object({
+  authCode: z.string().trim().min(1, "Credential is required..."),
+});
+
+export const UserSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  providerToken: z.string().optional().nullable(),
+  avatarUrl: z.string().nullable(),
+  phone: z.string().nullable(),
+  gender: z.string().nullable(),
+  dob: z.string().nullable(),
+  createdAt: z.string(),
+  lastSignInAt: z.string().optional(),
+  refreshToken: z.string().optional(),
+  accessToken: z.string().optional(),
+  expiresAt: z.number().optional(),
+});
+
+export type UserType = z.infer<typeof UserSchema>;
