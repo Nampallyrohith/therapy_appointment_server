@@ -16,7 +16,7 @@ app.use("/api", routes);
 // Start the server after initializing tables
 (async () => {
     try {
-        await connectAndQuery();
+        connectAndQuery();
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`);
         });

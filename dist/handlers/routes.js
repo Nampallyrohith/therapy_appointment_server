@@ -1,78 +1,40 @@
 import { Router } from "express";
-import { loginSchema, signupSchema, UserSchema, } from "../schema/user.js";
-import { createUser, insertUserDetails, loginUser } from "../services/user.js";
-import { DatabaseError, NotFoundError, PasswordNotMatch, UserAlreadyExistsError, } from "../services/errors.js";
+import { UserSchema } from "../schema/user.js";
+import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
+import { NotFound } from "../services/errors.js";
 export const defineRoute = (handler) => handler;
 const router = Router();
 // Define routes
 router.get("/health", defineRoute((req, res) => {
     res.json({ status: "OK" });
 }));
-router.post("/signup", defineRoute(async (req, res) => {
-    try {
-        const { fullName, email, password } = signupSchema.parse(req.body);
-        await createUser(fullName, email, password);
-        res.status(201).send({ message: "User created successfully" });
-    }
-    catch (error) {
-        if (error instanceof UserAlreadyExistsError) {
-            res.status(400).send({ message: "User already exists" });
-        }
-        else if (error instanceof DatabaseError) {
-            res.status(500).send({ message: "Database error" });
-        }
-        res.status(500).send({ message: "Internal Server Error" });
-    }
-}));
-router.post("/login", defineRoute(async (req, res) => {
-    try {
-        const { email, password } = loginSchema.parse(req.body);
-        const response = await loginUser(email, password);
-        res.status(200).send({
-            message: "Logged in successfully",
-            token: response.token,
-            user: response.user,
-        });
-    }
-    catch (error) {
-        if (error instanceof NotFoundError) {
-            res.status(404).send({ message: "User doesn't exist" });
-        }
-        if (error instanceof PasswordNotMatch) {
-            res.status(400).send({ message: "Invalid Credentials" });
-        }
-        res.status(500).send({ message: "Internal Server Error" });
-    }
-}));
 router.post("/auth/google/signin", defineRoute(async (req, res) => {
     try {
         const user = UserSchema.parse(req.body);
-        console.log(user);
         await insertUserDetails(user);
-        res.status(200).send({ message: "User created successfully" });
+        return res.status(200).json({ message: "User created successfully" });
     }
-    catch (error) { }
+    catch (error) {
+        console.log("error:", error);
+        return res.status(500).json({ error: error });
+    }
 }));
-// router.post(
-//   "/auth/google/signin",
-//   defineRoute(async (req, res) => {
-//     try {
-//       const { credentials } = googleAuthSchema.parse(req.body);
-//       console.log("credentials", credentials);
-//       const userDetails = await googleAuthentication(credentials);
-//       res.json({ message: "Authentication successful", user: userDetails });
-//     } catch (error) {
-//       if (error instanceof InvalidToken) {
-//         res.status(400).send({
-//           message: "Invalid credential token while verifying with google.",
-//         });
-//       }
-//       if (error instanceof ExchangeTokenError) {
-//         res.status(400).send({ message: "Failed to exchange token" });
-//       }
-//       console.error("error:---",error);
-//       res.status(500).send({ message: error });
-//     }
-//   })
-// );
+router.get("/user/profile-info/:googleUserId", defineRoute(async (req, res) => {
+    try {
+        const { googleUserId } = req.params;
+        const user = await getUserByGoogleId(googleUserId);
+        return res.status(200).send({
+            message: "User Successfully retrived.",
+            userDetails: user.userInfo,
+            userMeta: user.userMeta,
+        });
+    }
+    catch (error) {
+        if (error instanceof NotFound) {
+            return res.status(400).json("User doesn't exists.");
+        }
+        console.log("error:", error);
+        return res.status(500).json({ error: error });
+    }
+}));
 export default router;

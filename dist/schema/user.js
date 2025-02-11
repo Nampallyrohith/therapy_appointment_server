@@ -11,17 +11,17 @@ export const googleAuthSchema = z.object({
     authCode: z.string().trim().min(1, "Credential is required..."),
 });
 export const UserSchema = z.object({
-    id: z.string(),
+    googleUserId: z.string(),
     name: z.string(),
     email: z.string(),
-    providerToken: z.string().optional().nullable(),
+    providerToken: z.string().nullable(),
     avatarUrl: z.string().nullable(),
     phone: z.string().nullable(),
     gender: z.string().nullable(),
     dob: z.string().nullable(),
     createdAt: z.string(),
-    lastSignInAt: z.string().optional(),
-    refreshToken: z.string().optional(),
-    accessToken: z.string().optional(),
-    expiresAt: z.number().optional(),
+    lastSignInAt: z.string().nullable(),
+    refreshToken: z.string().nullable(),
+    accessToken: z.string().nullable(),
+    expiresAt: z.number().nullable(),
 });
