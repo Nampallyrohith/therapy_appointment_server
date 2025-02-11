@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_sign_in_at TIMESTAMP,
 
-    CONSTRAINT phone_format_check CHECK (phone ~ '^[0-9]{10}$'),
 
+    CONSTRAINT phone_format_check CHECK (phone ~ '^[0-9]{10}$'),
     CONSTRAINT gender_options_check CHECK (gender IN ('Male', 'Female', 'Other')),
     CONSTRAINT last_sign_in_at_format_check CHECK (last_sign_in_at IS NULL OR last_sign_in_at >= created_at)
 );
