@@ -21,7 +21,6 @@ const baseConfigSchema = z.object({
   DBPASS: z.string().min(1),
   DBNAME: z.string().min(1),
   SECRET_KEY: z.string().min(1),
-  DATABASE_URL: z.string().url(),
 });
 
 const env = baseConfigSchema.parse(process.env);

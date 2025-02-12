@@ -11,7 +11,6 @@ export const getUserByEmail = async (email: string) => {
 };
 
 export const getUserById = async (googleUserId: string) => {
-  console.log("inside user by id");
   const response = await (
     await client.query(QUERIES.getUserByGoogleUserId, [googleUserId])
   ).rows[0];
@@ -75,7 +74,6 @@ export const getUserByGoogleId = async (googleUserId: string) => {
   const user = await getUserById(googleUserId);
 
   if (!user) {
-    console.error("User not found for Google ID:", googleUserId);
     throw new NotFound("Invalid google user id");
   }
   return {
