@@ -20,9 +20,17 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dayjs": "^1.11.13",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "express-session": "^1.18.1",
     "fs": "^0.0.1-security",
+    "google-auth-library": "^9.15.1",
+    "googleapis": "^144.0.0",
+    "http": "^0.0.1-security",
+    "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "path": "^0.12.7",
     "pg": "^8.13.1",
@@ -32,7 +40,11 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.1",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.10.3",
     "@types/pg": "^8.11.10",
     "typescript": "^5.7.2"
