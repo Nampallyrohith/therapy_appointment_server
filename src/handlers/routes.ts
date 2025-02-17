@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import { UserSchema } from "../schema/user.js";
 import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
 import { NotFound } from "../services/errors.js";
+import { getAllTherapies } from "../services/appointment.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
 export const defineRoute = (handler: RouteHandler) => handler;
@@ -49,6 +50,18 @@ router.get(
       return res.status(500).json({ error: error });
     }
   })
+);
+
+router.use(
+  "/user",
+  router.get(
+    "/appointment/therapies",
+    defineRoute(async (req, res) => {
+      const response = await getAllTherapies();
+      console.log("Response", response);
+      res.status(200).send({ message: response });
+    })
+  )
 );
 
 export default router;

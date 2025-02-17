@@ -16,7 +16,7 @@ export const connectAndQuery = () => {
     if (!err) {
       console.log("Connected to supabase database.");
     } else {
-      console.log(err.message);
+      console.log("Error:",err.message);
     }
   });
 };

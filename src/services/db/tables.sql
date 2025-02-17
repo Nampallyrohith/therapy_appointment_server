@@ -26,10 +26,19 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_phone ON users(phone);
 
--- CREATE TABLE IF NOT EXISTS appointments (
---     id SERIAL PRIMARY KEY,
---     user_id INT REFERENCES users(id),
---     date TIMESTAMP NOT NULL,
---     status VARCHAR(50) DEFAULT 'pending',
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--- );
+
+CREATE TABLE IF NOT EXISTS therapies (
+    id VARCHAR(100) PRIMARY KEY,
+    therapy_name TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS doctors (
+    id INTEGER PRIMARY KEY,
+    therapy_id INTEGER not null,
+    name TEXT NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    avatar_url TEXT not null,
+    experience INTEGER not null,
+    specialist_in TEXT not null,
+    available_dates TEXT not null
+);
