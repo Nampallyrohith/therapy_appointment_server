@@ -53,14 +53,29 @@ router.get(
 );
 
 router.use(
-  "/user",
+  "/user/appointment",
   router.get(
-    "/appointment/therapies",
+    "/therapies",
     defineRoute(async (req, res) => {
       const response = await getAllTherapies();
       console.log("Response", response);
       res.status(200).send({ message: response });
     })
+  ),
+
+  router.get(
+    "/:therapyId/doctors",
+    defineRoute(async (req, res) => {})
+  ),
+
+  router.get(
+    "/:doctorId/available_dates",
+    defineRoute(async (req, res) => {})
+  ),
+
+  router.get(
+    "/:doctorId/:selected_date/available_time",
+    defineRoute(async (req, res) => {})
   )
 );
 
