@@ -41,5 +41,5 @@ CREATE TABLE IF NOT EXISTS doctors (
     avatar_url TEXT,
     experience INTEGER not null,
     specialist_in TEXT not null,
-    available_dates TEXT
+    leave_dates DATE[]
 );

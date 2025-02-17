@@ -14,6 +14,7 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
   const doctors = (
     await client.query(QUERIES.getAllDoctorsByTherapyIdQuery, [therapyId])
   ).rows;
+  console.log(doctors);
   return doctors.map((doctor) => ({
     id: doctor.id,
     therapyId: doctor.therapy_id,
@@ -22,6 +23,9 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
     avatarUrl: doctor.avatar_url,
     experience: doctor.experience,
     specialistIn: doctor.specialist_in,
-    availableDates: doctor.available_dates,
+    leaveDates: doctor.leave_dates
+      .replace(/[\[\]]/g, "")
+      .split(", ")
+      .map((date: string) => date.trim()),
   }));
 };
