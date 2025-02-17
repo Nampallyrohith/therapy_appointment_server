@@ -5,6 +5,7 @@ import { NotFound } from "../services/errors.js";
 import {
   getAllDoctorsByTherapyId,
   getAllTherapies,
+  getAvailableDates,
 } from "../services/appointment.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
@@ -78,14 +79,20 @@ router.use(
   ),
 
   router.get(
-    "/:doctorId/available_dates",
-    defineRoute(async (req, res) => {})
+    "/:doctorId/available_datetime",
+    defineRoute(async (req, res) => {
+      const { doctorId } = req.params;
+      const response = await getAvailableDates(doctorId);
+      res.status(200).send({
+        message: response,
+      });
+    })
   ),
 
-  router.get(
-    "/:doctorId/:selected_date/available_time",
-    defineRoute(async (req, res) => {})
-  )
+  // router.get(
+  //   "/:doctorId/:selected_date/available_time",
+  //   defineRoute(async (req, res) => {})
+  // )
 );
 
 export default router;

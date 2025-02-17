@@ -40,6 +40,12 @@ CREATE TABLE IF NOT EXISTS doctors (
     email VARCHAR(100) UNIQUE,
     avatar_url TEXT,
     experience INTEGER not null,
-    specialist_in TEXT not null,
-    leave_dates DATE[]
+    specialist_in TEXT not null
 );
+
+CREATE TABLE IF NOT EXISTS doctors_datetime (
+    id INTEGER PRIMARY KEY,
+    doctor_id INTEGER not null references doctors(id) on delete cascade,
+    leave_dates TEXT,
+    available_time TEXT
+)

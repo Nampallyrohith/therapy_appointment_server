@@ -1,4 +1,4 @@
-import { therapy } from "../schema/appointment.schema.js";
+import { date } from "zod";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 
@@ -28,4 +28,21 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
       .split(", ")
       .map((date: string) => date.trim()),
   }));
+};
+
+export const getAvailableDates = async (doctorIdStr: string) => {
+  const doctorId = Number(doctorIdStr);
+  const datetime = (
+    await client.query(QUERIES.getAvailableDatesQuery, [doctorId])
+  ).rows[0];
+
+  return {
+    id: datetime.id,
+    doctorId: datetime.doctor_id,
+    leaveDates: datetime.leave_dates
+      .replace(/[\[\]]/g, "")
+      .split(", ")
+      .map((date: string) => date.trim()),
+    availableTime: datetime.available_time,
+  };
 };
