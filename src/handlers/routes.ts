@@ -2,7 +2,10 @@ import { Router, Request, Response } from "express";
 import { UserSchema } from "../schema/user.js";
 import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
 import { NotFound } from "../services/errors.js";
-import { getAllTherapies } from "../services/appointment.js";
+import {
+  getAllDoctorsByTherapyId,
+  getAllTherapies,
+} from "../services/appointment.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
 export const defineRoute = (handler: RouteHandler) => handler;
@@ -65,7 +68,13 @@ router.use(
 
   router.get(
     "/:therapyId/doctors",
-    defineRoute(async (req, res) => {})
+    defineRoute(async (req, res) => {
+      const { therapyId } = req.params;
+      const response = await getAllDoctorsByTherapyId(therapyId);
+      res.status(200).send({
+        message: response,
+      });
+    })
   ),
 
   router.get(

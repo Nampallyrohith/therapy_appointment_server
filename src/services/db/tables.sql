@@ -32,13 +32,14 @@ CREATE TABLE IF NOT EXISTS therapies (
     therapy_name TEXT NOT NULL
 );
 
+-- TODO: Make it not null to email and avatar_url
 CREATE TABLE IF NOT EXISTS doctors (
     id INTEGER PRIMARY KEY,
-    therapy_id INTEGER not null,
+    therapy_id VARCHAR(100) not null,
     name TEXT NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    avatar_url TEXT not null,
+    email VARCHAR(100) UNIQUE,
+    avatar_url TEXT,
     experience INTEGER not null,
     specialist_in TEXT not null,
-    available_dates TEXT not null
+    available_dates TEXT
 );
