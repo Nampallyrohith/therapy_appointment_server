@@ -6,7 +6,9 @@ import {
   getAllDoctorsByTherapyId,
   getAllTherapies,
   getAvailableDates,
+  insertEventInfo,
 } from "../services/appointment.js";
+import { eventSchema } from "../schema/appointment.schema.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
 export const defineRoute = (handler: RouteHandler) => handler;
@@ -62,8 +64,12 @@ router.use(
     "/therapies",
     defineRoute(async (req, res) => {
       const response = await getAllTherapies();
-      console.log("Response", response);
-      res.status(200).send({ message: response });
+      res
+        .status(200)
+        .send({
+          message: "Successfully therapies retrived.",
+          therapies: response,
+        });
     })
   ),
 
@@ -73,7 +79,8 @@ router.use(
       const { therapyId } = req.params;
       const response = await getAllDoctorsByTherapyId(therapyId);
       res.status(200).send({
-        message: response,
+        message: "Successfully doctor's retrived.",
+        doctors: response,
       });
     })
   ),
@@ -89,10 +96,21 @@ router.use(
     })
   ),
 
-  // router.get(
-  //   "/:doctorId/:selected_date/available_time",
-  //   defineRoute(async (req, res) => {})
-  // )
+  router.post(
+    "/create-event/:googleUserId",
+    defineRoute(async (req, res) => {
+      const { googleUserId } = req.params;
+      const event = eventSchema.parse(req.body);
+      await insertEventInfo(googleUserId, event);
+    })
+  )
+
+  // TODO:
+  // POST - Creating an event
+  // listing out the appointments
+  // canceling the appointments
+  // past event or appointments
+  // etc...
 );
 
 export default router;

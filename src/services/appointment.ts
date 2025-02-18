@@ -1,4 +1,4 @@
-import { date } from "zod";
+import { EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 
@@ -14,7 +14,6 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
   const doctors = (
     await client.query(QUERIES.getAllDoctorsByTherapyIdQuery, [therapyId])
   ).rows;
-  console.log(doctors);
   return doctors.map((doctor) => ({
     id: doctor.id,
     therapyId: doctor.therapy_id,
@@ -23,10 +22,6 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
     avatarUrl: doctor.avatar_url,
     experience: doctor.experience,
     specialistIn: doctor.specialist_in,
-    leaveDates: doctor.leave_dates
-      .replace(/[\[\]]/g, "")
-      .split(", ")
-      .map((date: string) => date.trim()),
   }));
 };
 
@@ -46,3 +41,8 @@ export const getAvailableDates = async (doctorIdStr: string) => {
     availableTime: datetime.available_time,
   };
 };
+
+export const insertEventInfo = async (
+  googleUserId: string,
+  event: EventSchema
+) => {};

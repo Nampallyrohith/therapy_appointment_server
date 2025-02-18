@@ -1,5 +1,8 @@
--- create role appuser with login password 'appuserpassword';
+-- ENUM
+create type status_enum as enum('upcoming', 'cancelled', 'previous');   
 
+
+-- Tables
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL ,
@@ -48,4 +51,24 @@ CREATE TABLE IF NOT EXISTS doctors_datetime (
     doctor_id INTEGER not null references doctors(id) on delete cascade,
     leave_dates TEXT,
     available_time TEXT
-)
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+    id INTEGER PRIMARY KEY,
+    user_id VARCHAR(50) not null references users(google_user_id) on delete cascade,
+    summary TEXT not null,
+    description TEXT not null,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    time_zone TEXT not null,
+    hangout_link TEXT not null,
+    status status_enum not null default 'upcoming',
+    feedback TEXT
+);
+
+CREATE TABLE IF NOT EXISTS appointments_attendees(
+    id SERIAL PRIMARY KEY,
+    appointment_id INTEGER NOT NULL references appointments(id) on delete cascade,
+    email TEXT not null CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z]{2,}$'),
+    UNIQUE (appointment_id, email)
+);
