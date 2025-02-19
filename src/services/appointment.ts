@@ -10,6 +10,20 @@ export const getAllTherapies = async () => {
   }));
 };
 
+export const getAllDoctors = async () => {
+  const doctors = (await client.query(QUERIES.getAllDoctosQuery)).rows;
+  return doctors.map((doctor) => ({
+    id: doctor.id,
+    therapyId: doctor.therapy_id,
+    name: doctor.name,
+    email: doctor.email,
+    avatarUrl: doctor.avatar_url,
+    experience: doctor.experience,
+    specialistIn: doctor.specialist_in,
+    about: doctor.about,
+  }));
+};
+
 export const getAllDoctorsByTherapyId = async (therapyId: string) => {
   const doctors = (
     await client.query(QUERIES.getAllDoctorsByTherapyIdQuery, [therapyId])
@@ -20,8 +34,8 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
     name: doctor.name,
     email: doctor.email,
     avatarUrl: doctor.avatar_url,
-    experience: doctor.experience,
-    specialistIn: doctor.specialist_in,
+    // experience: doctor.experience,
+    // specialistIn: doctor.specialist_in,
   }));
 };
 

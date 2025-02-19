@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS doctors (
     email VARCHAR(100) UNIQUE,
     avatar_url TEXT,
     experience INTEGER not null,
-    specialist_in TEXT not null
+    specialist_in TEXT not null,
+    about text not null
 );
 
 CREATE TABLE IF NOT EXISTS doctors_datetime (

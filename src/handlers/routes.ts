@@ -3,6 +3,7 @@ import { UserSchema } from "../schema/user.js";
 import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
 import { NotFound } from "../services/errors.js";
 import {
+  getAllDoctors,
   getAllDoctorsByTherapyId,
   getAllTherapies,
   getAvailableDates,
@@ -64,12 +65,21 @@ router.use(
     "/therapies",
     defineRoute(async (req, res) => {
       const response = await getAllTherapies();
-      res
-        .status(200)
-        .send({
-          message: "Successfully therapies retrived.",
-          therapies: response,
-        });
+      res.status(200).send({
+        message: "Successfully therapies retrived.",
+        therapies: response,
+      });
+    })
+  ),
+
+  router.get(
+    "/doctors",
+    defineRoute(async (req, res) => {
+      const response = await getAllDoctors();
+      res.status(200).send({
+        message: "Successfully doctors retrived.",
+        doctors: response,
+      });
     })
   ),
 
@@ -91,7 +101,8 @@ router.use(
       const { doctorId } = req.params;
       const response = await getAvailableDates(doctorId);
       res.status(200).send({
-        message: response,
+        message: "Successfully retrieved doctor's date and time",
+        dateTime: response,
       });
     })
   ),
