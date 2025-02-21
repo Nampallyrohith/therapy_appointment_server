@@ -117,10 +117,7 @@ router.use(
   )
 
   // TODO:
-  // POST - Creating an event
   // listing out the appointments
-  // canceling the appointments
-  // past event or appointments
   // etc...
 );
 
