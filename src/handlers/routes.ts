@@ -110,9 +110,20 @@ router.use(
   router.post(
     "/create-event/:googleUserId",
     defineRoute(async (req, res) => {
-      const { googleUserId } = req.params;
-      const event = eventSchema.parse(req.body);
-      await insertEventInfo(googleUserId, event);
+      try {
+        const { googleUserId } = req.params;
+        const event = eventSchema.parse(req.body);
+        await insertEventInfo(googleUserId, event);
+        res
+          .status(201)
+          .send({ ok: true, message: "Event inserted successfully" });
+      } catch (error) {
+        if (error instanceof NotFound) {
+          return res.status(400).json({ error: "User doesn't exists." })
+        }
+        console.log("error:", error);
+        return res.status(500).json({ error: error });
+      }
     })
   )
 

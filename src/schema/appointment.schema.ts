@@ -21,7 +21,7 @@ export const eventSchema = z.object({
       email: z.string().trim().min(1).email(),
     })
   ),
-  hangoutLink: z.string(),
+  hangoutLink: z.string().trim().min(1).url(),
 });
 
 export type EventSchema = z.infer<typeof eventSchema>;

@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS doctors_datetime (
 );
 
 CREATE TABLE IF NOT EXISTS appointments (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id VARCHAR(50) not null references users(google_user_id) on delete cascade,
     summary TEXT not null,
     description TEXT not null,
@@ -64,7 +64,6 @@ CREATE TABLE IF NOT EXISTS appointments (
     time_zone TEXT not null,
     hangout_link TEXT not null,
     status status_enum not null default 'upcoming',
-    feedback TEXT
 );
 
 CREATE TABLE IF NOT EXISTS appointments_attendees(
@@ -73,3 +72,10 @@ CREATE TABLE IF NOT EXISTS appointments_attendees(
     email TEXT not null CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z]{2,}$'),
     UNIQUE (appointment_id, email)
 );
+
+CREATE TABLE IF NOT EXISTS appointment_feedback (
+    id SERIAL PRIMARY KEY,
+    appointment_id INTEGER not null references appointments(id) on delete cascade,
+    rating INTEGER not null,
+    review TEXT not null
+)

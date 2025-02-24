@@ -1,6 +1,8 @@
 import { EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
+import { NotFound } from "./errors.js";
+import { getUserByGoogleId } from "./user.js";
 
 export const getAllTherapies = async () => {
   const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
@@ -59,4 +61,19 @@ export const getAvailableDates = async (doctorIdStr: string) => {
 export const insertEventInfo = async (
   googleUserId: string,
   event: EventSchema
-) => {};
+) => {
+  const isUserExists = getUserByGoogleId(googleUserId);
+  if (!isUserExists) {
+    throw new NotFound("User does exists.");
+  }
+  await client.query(QUERIES.insertAppointmentEventQuery, [
+    googleUserId,
+    event.summary,
+    event.description,
+    event.start.dateTime,
+    event.end.dateTime,
+    event.start.timeZone,
+    event.hangoutLink,
+  ]);
+  return true;
+};
