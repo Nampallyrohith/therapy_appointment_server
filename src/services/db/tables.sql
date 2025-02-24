@@ -1,5 +1,8 @@
--- create role appuser with login password 'appuserpassword';
+-- ENUM
+create type status_enum as enum('upcoming', 'cancelled', 'previous');   
 
+
+-- Tables
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL ,
@@ -26,10 +29,53 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_phone ON users(phone);
 
--- CREATE TABLE IF NOT EXISTS appointments (
---     id SERIAL PRIMARY KEY,
---     user_id INT REFERENCES users(id),
---     date TIMESTAMP NOT NULL,
---     status VARCHAR(50) DEFAULT 'pending',
---     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
--- );
+
+CREATE TABLE IF NOT EXISTS therapies (
+    id VARCHAR(100) PRIMARY KEY,
+    therapy_name TEXT NOT NULL
+);
+
+-- TODO: Make it not null to email and avatar_url
+CREATE TABLE IF NOT EXISTS doctors (
+    id INTEGER PRIMARY KEY,
+    therapy_id VARCHAR(100) not null,
+    name TEXT NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    avatar_url TEXT,
+    experience INTEGER not null,
+    specialist_in TEXT not null,
+    about text not null
+);
+
+CREATE TABLE IF NOT EXISTS doctors_datetime (
+    id INTEGER PRIMARY KEY,
+    doctor_id INTEGER not null references doctors(id) on delete cascade,
+    leave_dates TEXT,
+    available_time TEXT
+);
+
+CREATE TABLE IF NOT EXISTS appointments (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(50) not null references users(google_user_id) on delete cascade,
+    summary TEXT not null,
+    description TEXT not null,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    time_zone TEXT not null,
+    hangout_link TEXT not null,
+    status status_enum not null default 'upcoming',
+);
+
+CREATE TABLE IF NOT EXISTS appointments_attendees(
+    id SERIAL PRIMARY KEY,
+    appointment_id INTEGER NOT NULL references appointments(id) on delete cascade,
+    email TEXT not null CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z]{2,}$'),
+    UNIQUE (appointment_id, email)
+);
+
+CREATE TABLE IF NOT EXISTS appointment_feedback (
+    id SERIAL PRIMARY KEY,
+    appointment_id INTEGER not null references appointments(id) on delete cascade,
+    rating INTEGER not null,
+    review TEXT not null
+)

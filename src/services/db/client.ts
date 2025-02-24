@@ -14,9 +14,9 @@ await client.connect();
 export const connectAndQuery = () => {
   client.query(`SELECT NOW()`, (err, res) => {
     if (!err) {
-      console.log("Connected to supabase database.");
+      console.log("Connected to supabase database..........");
     } else {
-      console.log(err.message);
+      console.log("Error:", err.message);
     }
   });
 };

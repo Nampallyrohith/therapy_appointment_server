@@ -6,3 +6,5 @@ logs
 
 .*env*
 !.env.example
+
+sample.sql

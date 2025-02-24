@@ -5,14 +5,14 @@ import { NotFound } from "./errors.js";
 
 export const getUserByEmail = async (email: string) => {
   const response = await (
-    await client.query(QUERIES.getUserByEmail, [email])
+    await client.query(QUERIES.getUserByEmailQuery, [email])
   ).rows[0];
   return response;
 };
 
 export const getUserById = async (googleUserId: string) => {
   const response = await (
-    await client.query(QUERIES.getUserByGoogleUserId, [googleUserId])
+    await client.query(QUERIES.getUserByGoogleUserIdQuery, [googleUserId])
   ).rows[0];
   return response;
 };
@@ -35,7 +35,7 @@ export const insertUserDetails = async (user: UserType) => {
   } = user;
   const userExists = await getUserByEmail(email);
   if (userExists) {
-    await client.query(QUERIES.updateUser, [
+    await client.query(QUERIES.updateUserQuery, [
       googleUserId,
       name,
       email,
@@ -51,7 +51,7 @@ export const insertUserDetails = async (user: UserType) => {
       lastSignInAt,
     ]);
   } else {
-    await client.query(QUERIES.insertNewUser, [
+    await client.query(QUERIES.insertNewUserQuery, [
       googleUserId,
       name,
       email,
