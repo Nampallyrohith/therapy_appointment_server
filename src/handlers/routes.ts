@@ -96,17 +96,40 @@ router.use(
   ),
 
   router.get(
-    "/:doctorId/available_datetime",
+    "/:doctorId/available_date",
     defineRoute(async (req, res) => {
       const { doctorId } = req.params;
+
       const response = await getAvailableDates(doctorId);
       res.status(200).send({
         message: "Successfully retrieved doctor's date and time",
-        dateTime: response,
+        date: response,
       });
     })
   ),
 
+  router.get(
+    "/:doctorId/available_time",
+    defineRoute(async (req, res) => {
+      const { doctorId } = req.params;
+      const date = Array.isArray(req.query.date)
+        ? req.query.date[0]
+        : req.query.date;
+
+      console.log(date);
+      if (!date || typeof date !== "string") {
+        return res
+          .status(400)
+          .send({ message: "Invalid or missing date parameter." });
+      }
+
+      const response = await getAvailableDates(doctorId, date);
+      res.status(200).send({
+        message: "Successfully retrieved doctor's time",
+        time: response,
+      });
+    })
+  ),
   router.post(
     "/create-event/:googleUserId",
     defineRoute(async (req, res) => {
@@ -119,7 +142,7 @@ router.use(
           .send({ ok: true, message: "Event inserted successfully" });
       } catch (error) {
         if (error instanceof NotFound) {
-          return res.status(400).json({ error: "User doesn't exists." })
+          return res.status(400).json({ error: "User doesn't exists." });
         }
         console.log("error:", error);
         return res.status(500).json({ error: error });
