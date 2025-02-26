@@ -66,6 +66,8 @@ export const insertEventInfo = async (
   if (!isUserExists) {
     throw new NotFound("User does exists.");
   }
+
+  const currentDateTime = new Date()
   const result = await client.query(QUERIES.insertAppointmentEventQuery, [
     googleUserId,
     event.summary,
@@ -74,6 +76,7 @@ export const insertEventInfo = async (
     event.end.dateTime,
     event.start.timeZone,
     event.hangoutLink,
+    currentDateTime
   ]);
 
   const appointmentId = result.rows[0].id;
