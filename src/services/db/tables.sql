@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS doctors_datetime (
 CREATE TABLE IF NOT EXISTS appointments (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(50) not null references users(google_user_id) on delete cascade,
+    doctor_id INTEGER not null references doctors(id) on delete cascade,
     summary TEXT not null,
     description TEXT not null,
     start_time TIMESTAMP NOT NULL,
@@ -70,7 +71,7 @@ CREATE TABLE IF NOT EXISTS appointments (
 CREATE TABLE IF NOT EXISTS appointments_attendees(
     id SERIAL PRIMARY KEY,
     appointment_id INTEGER NOT NULL references appointments(id) on delete cascade,
-    email TEXT not null CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z]{2,}$'),
+    email TEXT not null,
     UNIQUE (appointment_id, email)
 );
 

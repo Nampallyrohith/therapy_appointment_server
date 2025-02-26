@@ -41,20 +41,92 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
   }));
 };
 
-export const getAvailableDates = async (doctorIdStr: string) => {
+export const getAvailableDates = async (doctorIdStr: string, date?: string) => {
   const doctorId = Number(doctorIdStr);
   const datetime = (
     await client.query(QUERIES.getAvailableDatesQuery, [doctorId])
   ).rows[0];
 
+  const leaveDates = datetime.leave_dates
+    .replace(/[\[\]]/g, "")
+    .split(", ")
+    .map((date: string) => date.trim());
+
+  if (date) {
+    return getAvailableTimes(doctorId, date, datetime);
+  }
+
   return {
     id: datetime.id,
     doctorId: datetime.doctor_id,
-    leaveDates: datetime.leave_dates
-      .replace(/[\[\]]/g, "")
-      .split(", ")
-      .map((date: string) => date.trim()),
-    availableTime: datetime.available_time,
+    leaveDates,
+  };
+};
+
+export const getAvailableTimes = async (
+  doctorId: number,
+  date: string,
+  datetime: { id: number; doctor_id: number; available_time: string | null }
+) => {
+  const bookedAppointments = await client.query(
+    QUERIES.getBookedAppointmentsQuery,
+    [doctorId, date]
+  );
+
+  const bookedTimes: string[] = bookedAppointments.rows.map((appointment) => {
+    const utcDate = new Date(appointment.start_time);
+
+    const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
+
+    let hours = istDate.getHours();
+    const minutes = String(istDate.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes}${ampm}`;
+  });
+
+  console.log("Raw booked slots time (IST):", bookedTimes);
+
+  const availableTimeSlots: string[] = datetime.available_time
+    ? datetime.available_time
+        .replace(/[\[\]]/g, "")
+        .split(", ")
+        .map((t: string) => t.trim())
+    : [];
+
+  const now = new Date();
+  const todayDate = now.toISOString().split("T")[0];
+  const isToday = date === todayDate;
+
+  const filteredTimeSlots: string[] = availableTimeSlots.filter((time) => {
+    if (bookedTimes.includes(time)) return false;
+
+    if (isToday) {
+      const match = time.match(/(\d+):(\d+)(AM|PM)/);
+      if (!match) return false;
+
+      let [_, hoursStr, minutesStr, ampm] = match;
+      let hours = parseInt(hoursStr, 10);
+      let minutes = parseInt(minutesStr, 10);
+
+      let slotTime = new Date();
+      slotTime.setHours(ampm === "PM" && hours !== 12 ? hours + 12 : hours);
+      slotTime.setMinutes(minutes);
+      slotTime.setSeconds(0);
+      slotTime.setMilliseconds(0);
+
+      return slotTime > now;
+    }
+    return true;
+  });
+
+  console.log("Filtered time slots in array:", filteredTimeSlots);
+
+  return {
+    id: datetime.id,
+    doctorId: datetime.doctor_id,
+    availableTimeSlots: filteredTimeSlots,
   };
 };
 
@@ -67,7 +139,7 @@ export const insertEventInfo = async (
     throw new NotFound("User does exists.");
   }
 
-  const currentDateTime = new Date()
+  const currentDateTime = new Date();
   const result = await client.query(QUERIES.insertAppointmentEventQuery, [
     googleUserId,
     event.summary,
@@ -76,7 +148,8 @@ export const insertEventInfo = async (
     event.end.dateTime,
     event.start.timeZone,
     event.hangoutLink,
-    currentDateTime
+    currentDateTime,
+    event.doctorId,
   ]);
 
   const appointmentId = result.rows[0].id;
