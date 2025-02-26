@@ -12,5 +12,7 @@ export const QUERIES = {
     "select * from doctors_datetime where doctor_id = $1;",
   getAllDoctosQuery: "Select * from doctors;",
   insertAppointmentEventQuery:
-    "Insert into appointments(user_id, summary, description, start_time, end_time, time_zone, hangout_link) values ($1, $2, $3, $4, $5, $6, $7);",
+    "Insert into appointments(user_id, summary, description, start_time, end_time, time_zone, hangout_link) values ($1, $2, $3, $4, $5, $6, $7) returning id;",
+  insertAppoinmentAttendeesQuery:
+    "Insert into appointments_attendees(appointment_id, email) values($1, $2);",
 };

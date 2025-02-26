@@ -66,7 +66,7 @@ export const insertEventInfo = async (
   if (!isUserExists) {
     throw new NotFound("User does exists.");
   }
-  await client.query(QUERIES.insertAppointmentEventQuery, [
+  const result = await client.query(QUERIES.insertAppointmentEventQuery, [
     googleUserId,
     event.summary,
     event.description,
@@ -75,5 +75,16 @@ export const insertEventInfo = async (
     event.start.timeZone,
     event.hangoutLink,
   ]);
+
+  const appointmentId = result.rows[0].id;
+  await Promise.all(
+    event.attendees.map((attendee) =>
+      client.query(QUERIES.insertAppoinmentAttendeesQuery, [
+        appointmentId,
+        attendee.email,
+      ])
+    )
+  );
+
   return true;
 };
