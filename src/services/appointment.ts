@@ -150,6 +150,7 @@ export const insertEventInfo = async (
     event.hangoutLink,
     currentDateTime,
     event.doctorId,
+    event.eventId
   ]);
 
   const appointmentId = result.rows[0].id;

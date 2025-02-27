@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(50) not null references users(google_user_id) on delete cascade,
     doctor_id INTEGER not null references doctors(id) on delete cascade,
+    event_id VARCHAR(100) not null,
     summary TEXT not null,
     description TEXT not null,
     start_time TIMESTAMP NOT NULL,

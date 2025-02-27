@@ -23,6 +23,7 @@ export const eventSchema = z.object({
   ),
   hangoutLink: z.string().trim().min(1).url(),
   doctorId: z.number(),
+  eventId: z.string(),
 });
 
 export type EventSchema = z.infer<typeof eventSchema>;
