@@ -1,6 +1,8 @@
 import { EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
+import { NotFound } from "./errors.js";
+import { getUserById } from "./user.js";
 
 export const getAllTherapies = async () => {
   const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
@@ -56,7 +58,32 @@ export const getAvailableDates = async (doctorIdStr: string) => {
   };
 };
 
+// TODO:
 export const insertEventInfo = async (
   googleUserId: string,
   event: EventSchema
 ) => {};
+
+export const getAllAppointments = async (userId: string) => {
+  const isUserExisting = await getUserById(userId);
+  if (!isUserExisting) {
+    throw new NotFound("Invalid user id");
+  }
+
+  const appointments = (
+    await client.query(QUERIES.getAllAppointmentsQuery, [userId])
+  ).rows;
+
+  return appointments.map((appointment) => ({
+    id: appointment.id,
+    userId: appointment.user_id,
+    summary: appointment.summary,
+    description: appointment.description,
+    startTime: appointment.start_time,
+    endTime: appointment.end_time,
+    timeZone: appointment.time_zone,
+    hangoutLink: appointment.hangout_link,
+    status: appointment.status,
+    feedback: appointment.feedback,
+  }));
+};

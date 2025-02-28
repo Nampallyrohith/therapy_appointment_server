@@ -11,4 +11,5 @@ export const QUERIES = {
   getAvailableDatesQuery:
     "select * from doctors_datetime where doctor_id = $1;",
   getAllDoctosQuery: "Select * from doctors;",
+  getAllAppointmentsQuery: "select * from appointments where user_id = $1;",
 };

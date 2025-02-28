@@ -8,6 +8,7 @@ import {
   getAllTherapies,
   getAvailableDates,
   insertEventInfo,
+  getAllAppointments,
 } from "../services/appointment.js";
 import { eventSchema } from "../schema/appointment.schema.js";
 
@@ -115,10 +116,30 @@ router.use(
       await insertEventInfo(googleUserId, event);
     })
   )
+);
 
-  // TODO:
-  // listing out the appointments
-  // etc...
+router.get(
+  "/user/my-appointments/:userId",
+  defineRoute(async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const response = await getAllAppointments(userId);
+
+      res.status(200).send({
+        message: "Successfully retrieved appointments",
+        appointments: response,
+      });
+    } catch (err) {
+      if (err instanceof NotFound) {
+        res.status(400).send({
+          error: "User doesn't exist",
+        });
+      }
+      res.status(500).send({
+        error: err,
+      });
+    }
+  })
 );
 
 export default router;
