@@ -2,7 +2,7 @@ import { EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
-import { getUserByGoogleId } from "./user.js";
+import { getUserById } from "./user.js";
 
 export const getAllTherapies = async () => {
   const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
@@ -134,7 +134,7 @@ export const insertEventInfo = async (
   googleUserId: string,
   event: EventSchema
 ) => {
-  const isUserExists = getUserByGoogleId(googleUserId);
+  const isUserExists = getUserById(googleUserId);
   if (!isUserExists) {
     throw new NotFound("User does exists.");
   }
@@ -150,7 +150,7 @@ export const insertEventInfo = async (
     event.hangoutLink,
     currentDateTime,
     event.doctorId,
-    event.eventId
+    event.eventId,
   ]);
 
   const appointmentId = result.rows[0].id;
