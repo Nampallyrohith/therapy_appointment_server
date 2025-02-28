@@ -5,7 +5,7 @@ create type status_enum as enum('upcoming', 'cancelled', 'previous');
 -- Tables
 
 CREATE TABLE IF NOT EXISTS users (
-    id SERIAL ,
+    id SERIAL,
     google_user_id VARCHAR(50) PRIMARY KEY UNIQUE,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS therapies (
 
 -- TODO: Make it not null to email and avatar_url
 CREATE TABLE IF NOT EXISTS doctors (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     therapy_id VARCHAR(100) not null,
     name TEXT NOT NULL,
     email VARCHAR(100) UNIQUE,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS doctors (
 );
 
 CREATE TABLE IF NOT EXISTS doctors_datetime (
-    id INTEGER PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     doctor_id INTEGER not null references doctors(id) on delete cascade,
     leave_dates TEXT,
     available_time TEXT

@@ -2,7 +2,7 @@ import { EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
-import { getUserByGoogleId, getUserById } from "./user.js";
+import { getUserById } from "./user.js";
 
 export const getAllTherapies = async () => {
   const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
@@ -75,7 +75,6 @@ export const getAvailableTimes = async (
 
   const bookedTimes: string[] = bookedAppointments.rows.map((appointment) => {
     const utcDate = new Date(appointment.start_time);
-
     const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
 
     let hours = istDate.getHours();
@@ -135,7 +134,7 @@ export const insertEventInfo = async (
   googleUserId: string,
   event: EventSchema
 ) => {
-  const isUserExists = getUserByGoogleId(googleUserId);
+  const isUserExists = getUserById(googleUserId);
   if (!isUserExists) {
     throw new NotFound("User does exists.");
   }
@@ -151,7 +150,7 @@ export const insertEventInfo = async (
     event.hangoutLink,
     currentDateTime,
     event.doctorId,
-    event.eventId
+    event.eventId,
   ]);
 
   const appointmentId = result.rows[0].id;
@@ -180,6 +179,8 @@ export const getAllAppointments = async (userId: string) => {
   return appointments.map((appointment) => ({
     id: appointment.id,
     userId: appointment.user_id,
+    doctorId: appointment.doctor_id,
+    eventId: appointment.event_id,
     summary: appointment.summary,
     description: appointment.description,
     startTime: appointment.start_time,
@@ -187,6 +188,6 @@ export const getAllAppointments = async (userId: string) => {
     timeZone: appointment.time_zone,
     hangoutLink: appointment.hangout_link,
     status: appointment.status,
-    feedback: appointment.feedback,
+    createdAt: appointment.created_at,
   }));
 };
