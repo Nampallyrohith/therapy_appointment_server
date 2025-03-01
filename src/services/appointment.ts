@@ -1,4 +1,4 @@
-import { EventSchema } from "../schema/appointment.schema.js";
+import { doctorType, EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
@@ -63,6 +63,18 @@ export const getAvailableDates = async (doctorIdStr: string, date?: string) => {
   };
 };
 
+const convertUTCToIST = (date: string) => {
+  const utcDate = new Date(date);
+  const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
+
+  let hours = istDate.getHours();
+  const minutes = String(istDate.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes}${ampm}`;
+};
+
 export const getAvailableTimes = async (
   doctorId: number,
   date: string,
@@ -73,17 +85,9 @@ export const getAvailableTimes = async (
     [doctorId, date]
   );
 
-  const bookedTimes: string[] = bookedAppointments.rows.map((appointment) => {
-    const utcDate = new Date(appointment.start_time);
-    const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
-
-    let hours = istDate.getHours();
-    const minutes = String(istDate.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-
-    hours = hours % 12 || 12;
-    return `${hours}:${minutes}${ampm}`;
-  });
+  const bookedTimes: string[] = bookedAppointments.rows.map((appointment) =>
+    convertUTCToIST(appointment.start_time)
+  );
 
   console.log("Raw booked slots time (IST):", bookedTimes);
 
@@ -151,6 +155,7 @@ export const insertEventInfo = async (
     currentDateTime,
     event.doctorId,
     event.eventId,
+    event.therapyType,
   ]);
 
   const appointmentId = result.rows[0].id;
@@ -176,28 +181,49 @@ export const getAllAppointments = async (userId: string) => {
     await client.query(QUERIES.getAllAppointmentsQuery, [userId])
   ).rows;
 
-  return appointments.map(async (appointment) => {
-    const doctorName = await client.query(QUERIES.getDoctorById, [
-      appointment.doctor_id,
-    ]);
+  console.log(appointments);
 
-    return {
-      id: appointment.id,
-      userId: appointment.user_id,
-      doctorId: appointment.doctor_id,
-      eventId: appointment.event_id,
-      summary: appointment.summary,
-      description: appointment.description,
-      startTime: appointment.start_time,
-      endTime: appointment.end_time,
-      timeZone: appointment.time_zone,
-      hangoutLink: appointment.hangout_link,
-      status: appointment.status,
-      createdAt: appointment.created_at,
-      typeOfTherapy: appointment.therapy_type,
-      doctorName,
-      cancelledOn: appointment.cancelled_on,
-      attended: appointment.attended,
-    };
-  });
+  return Promise.all(
+    appointments.map(async (appointment) => {
+      const doctorResult = await client.query(QUERIES.getDoctorById, [
+        appointment.doctor_id,
+      ]);
+      const doctor: doctorType = doctorResult.rows[0]; // Ensure correct access
+      const startDate = new Date(appointment.start_time);
+      const endDate = new Date(appointment.end_time);
+
+      return {
+        id: appointment.id,
+        userId: appointment.user_id,
+        doctorId: appointment.doctor_id,
+        eventId: appointment.event_id,
+        summary: appointment.summary,
+        description: appointment.description,
+        startTime:
+          startDate.getDate() +
+          "/" +
+          startDate.getMonth() +
+          "/" +
+          startDate.getFullYear() +
+          " " +
+          convertUTCToIST(appointment.start_time),
+        endTime:
+          endDate.getDate() +
+          "/" +
+          endDate.getMonth() +
+          "/" +
+          endDate.getFullYear() +
+          " " +
+          convertUTCToIST(appointment.end_time),
+        timeZone: appointment.time_zone,
+        hangoutLink: appointment.hangout_link,
+        status: appointment.status,
+        createdAt: appointment.created_at,
+        typeOfTherapy: appointment.therapy_type,
+        doctorName: doctor?.name || null, // Ensure doctor exists
+        cancelledOn: appointment.cancelled_on,
+        attended: appointment.attended,
+      };
+    })
+  );
 };

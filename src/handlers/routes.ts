@@ -158,6 +158,7 @@ router.get(
     try {
       const { userId } = req.params;
       const response = await getAllAppointments(userId);
+      console.log(response);
 
       res.status(200).send({
         message: "Successfully retrieved appointments",
