@@ -18,4 +18,5 @@ export const QUERIES = {
   getBookedAppointmentsQuery:
     "select start_time from appointments where doctor_id=$1 and DATE(start_time)=$2;",
   getAllAppointmentsQuery: "select * from appointments where user_id = $1;",
+  getDoctorById: "select * from doctors where id = $1;",
 };

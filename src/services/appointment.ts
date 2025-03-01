@@ -176,18 +176,28 @@ export const getAllAppointments = async (userId: string) => {
     await client.query(QUERIES.getAllAppointmentsQuery, [userId])
   ).rows;
 
-  return appointments.map((appointment) => ({
-    id: appointment.id,
-    userId: appointment.user_id,
-    doctorId: appointment.doctor_id,
-    eventId: appointment.event_id,
-    summary: appointment.summary,
-    description: appointment.description,
-    startTime: appointment.start_time,
-    endTime: appointment.end_time,
-    timeZone: appointment.time_zone,
-    hangoutLink: appointment.hangout_link,
-    status: appointment.status,
-    createdAt: appointment.created_at,
-  }));
+  return appointments.map(async (appointment) => {
+    const doctorName = await client.query(QUERIES.getDoctorById, [
+      appointment.doctor_id,
+    ]);
+
+    return {
+      id: appointment.id,
+      userId: appointment.user_id,
+      doctorId: appointment.doctor_id,
+      eventId: appointment.event_id,
+      summary: appointment.summary,
+      description: appointment.description,
+      startTime: appointment.start_time,
+      endTime: appointment.end_time,
+      timeZone: appointment.time_zone,
+      hangoutLink: appointment.hangout_link,
+      status: appointment.status,
+      createdAt: appointment.created_at,
+      typeOfTherapy: appointment.therapy_type,
+      doctorName,
+      cancelledOn: appointment.cancelled_on,
+      attended: appointment.attended,
+    };
+  });
 };
