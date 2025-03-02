@@ -66,7 +66,10 @@ CREATE TABLE IF NOT EXISTS appointments (
     time_zone TEXT not null,
     hangout_link TEXT not null,
     status status_enum not null default 'upcoming',
-    created_at TIMESTAMP not null
+    created_at TIMESTAMP not null,
+    therapy_type TEXT not null,
+    cancelled_on TIMESTAMP,
+    attended BOOLEAN
 );
 
 CREATE TABLE IF NOT EXISTS appointments_attendees(

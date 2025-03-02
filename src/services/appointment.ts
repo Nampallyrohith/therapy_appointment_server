@@ -1,4 +1,4 @@
-import { EventSchema } from "../schema/appointment.schema.js";
+import { doctorType, EventSchema } from "../schema/appointment.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
@@ -63,6 +63,18 @@ export const getAvailableDates = async (doctorIdStr: string, date?: string) => {
   };
 };
 
+const convertUTCToIST = (date: string) => {
+  const utcDate = new Date(date);
+  const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
+
+  let hours = istDate.getHours();
+  const minutes = String(istDate.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12 || 12;
+  return `${hours}:${minutes}${ampm}`;
+};
+
 export const getAvailableTimes = async (
   doctorId: number,
   date: string,
@@ -73,20 +85,9 @@ export const getAvailableTimes = async (
     [doctorId, date]
   );
 
-  const bookedTimes: string[] = bookedAppointments.rows.map((appointment) => {
-    const utcDate = new Date(appointment.start_time);
-
-    const istDate = new Date(utcDate.getTime() + 5.5 * 60 * 60 * 1000);
-
-    let hours = istDate.getHours();
-    const minutes = String(istDate.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-
-    hours = hours % 12 || 12;
-    return `${hours}:${minutes}${ampm}`;
-  });
-
-  console.log("Raw booked slots time (IST):", bookedTimes);
+  const bookedTimes: string[] = bookedAppointments.rows.map((appointment) =>
+    convertUTCToIST(appointment.start_time)
+  );
 
   const availableTimeSlots: string[] = datetime.available_time
     ? datetime.available_time
@@ -121,8 +122,6 @@ export const getAvailableTimes = async (
     return true;
   });
 
-  console.log("Filtered time slots in array:", filteredTimeSlots);
-
   return {
     id: datetime.id,
     doctorId: datetime.doctor_id,
@@ -151,6 +150,7 @@ export const insertEventInfo = async (
     currentDateTime,
     event.doctorId,
     event.eventId,
+    event.therapyType,
   ]);
 
   const appointmentId = result.rows[0].id;
@@ -164,4 +164,52 @@ export const insertEventInfo = async (
   );
 
   return true;
+};
+
+export const getAllAppointments = async (userId: string) => {
+  const isUserExisting = await getUserById(userId);
+  if (!isUserExisting) {
+    throw new NotFound("Invalid user id");
+  }
+
+  const appointments = (
+    await client.query(QUERIES.getAllAppointmentsQuery, [userId])
+  ).rows;
+
+  return Promise.all(
+    appointments.map(async (appointment) => {
+      const doctorResult = await client.query(QUERIES.getDoctorById, [
+        appointment.doctor_id,
+      ]);
+      const doctor: doctorType = doctorResult.rows[0];
+
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-GB");
+      };
+
+      return {
+        id: appointment.id,
+        userId: appointment.user_id,
+        doctorId: appointment.doctor_id,
+        eventId: appointment.event_id,
+        summary: appointment.summary,
+        description: appointment.description,
+        startTime: `${formatDate(appointment.start_time)} ${convertUTCToIST(
+          appointment.start_time
+        )}`,
+        endTime: `${formatDate(appointment.end_time)} ${convertUTCToIST(
+          appointment.end_time
+        )}`,
+        timeZone: appointment.time_zone,
+        hangoutLink: appointment.hangout_link,
+        status: appointment.status,
+        createdAt: new Date(appointment.created_at).toLocaleString(),
+        typeOfTherapy: appointment.therapy_type,
+        doctorName: doctor?.name,
+        cancelledOn: appointment.cancelled_on,
+        attended: appointment.attended,
+      };
+    })
+  );
 };
