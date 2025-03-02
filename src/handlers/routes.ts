@@ -33,7 +33,6 @@ router.post(
       await insertUserDetails(user);
       return res.status(200).json({ message: "User created successfully" });
     } catch (error) {
-      console.log("error:", error);
       return res.status(500).json({ error: error });
     }
   })
@@ -54,7 +53,6 @@ router.get(
       if (error instanceof NotFound) {
         return res.status(400).json("User doesn't exists.");
       }
-      console.log("error:", error);
       return res.status(500).json({ error: error });
     }
   })
@@ -117,7 +115,6 @@ router.use(
         ? req.query.date[0]
         : req.query.date;
 
-      console.log(date);
       if (!date || typeof date !== "string") {
         return res
           .status(400)
@@ -145,7 +142,6 @@ router.use(
         if (error instanceof NotFound) {
           return res.status(400).json({ error: "User doesn't exists." });
         }
-        console.log("error:", error);
         return res.status(500).json({ error: error });
       }
     })
@@ -153,12 +149,11 @@ router.use(
 );
 
 router.get(
-  "/user/my-appointments/:userId",
+  "/user/my-appointments/:googleUserId",
   defineRoute(async (req, res) => {
     try {
-      const { userId } = req.params;
-      const response = await getAllAppointments(userId);
-      console.log(response);
+      const { googleUserId } = req.params;
+      const response = await getAllAppointments(googleUserId);
 
       res.status(200).send({
         message: "Successfully retrieved appointments",

@@ -89,8 +89,6 @@ export const getAvailableTimes = async (
     convertUTCToIST(appointment.start_time)
   );
 
-  console.log("Raw booked slots time (IST):", bookedTimes);
-
   const availableTimeSlots: string[] = datetime.available_time
     ? datetime.available_time
         .replace(/[\[\]]/g, "")
@@ -124,8 +122,6 @@ export const getAvailableTimes = async (
     return true;
   });
 
-  console.log("Filtered time slots in array:", filteredTimeSlots);
-
   return {
     id: datetime.id,
     doctorId: datetime.doctor_id,
@@ -133,7 +129,6 @@ export const getAvailableTimes = async (
   };
 };
 
-// TODO:
 export const insertEventInfo = async (
   googleUserId: string,
   event: EventSchema
@@ -181,16 +176,17 @@ export const getAllAppointments = async (userId: string) => {
     await client.query(QUERIES.getAllAppointmentsQuery, [userId])
   ).rows;
 
-  console.log(appointments);
-
   return Promise.all(
     appointments.map(async (appointment) => {
       const doctorResult = await client.query(QUERIES.getDoctorById, [
         appointment.doctor_id,
       ]);
-      const doctor: doctorType = doctorResult.rows[0]; // Ensure correct access
-      const startDate = new Date(appointment.start_time);
-      const endDate = new Date(appointment.end_time);
+      const doctor: doctorType = doctorResult.rows[0];
+
+      const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-GB");
+      };
 
       return {
         id: appointment.id,
@@ -199,28 +195,18 @@ export const getAllAppointments = async (userId: string) => {
         eventId: appointment.event_id,
         summary: appointment.summary,
         description: appointment.description,
-        startTime:
-          startDate.getDate() +
-          "/" +
-          startDate.getMonth() +
-          "/" +
-          startDate.getFullYear() +
-          " " +
-          convertUTCToIST(appointment.start_time),
-        endTime:
-          endDate.getDate() +
-          "/" +
-          endDate.getMonth() +
-          "/" +
-          endDate.getFullYear() +
-          " " +
-          convertUTCToIST(appointment.end_time),
+        startTime: `${formatDate(appointment.start_time)} ${convertUTCToIST(
+          appointment.start_time
+        )}`,
+        endTime: `${formatDate(appointment.end_time)} ${convertUTCToIST(
+          appointment.end_time
+        )}`,
         timeZone: appointment.time_zone,
         hangoutLink: appointment.hangout_link,
         status: appointment.status,
-        createdAt: appointment.created_at,
+        createdAt: new Date(appointment.created_at).toLocaleString(),
         typeOfTherapy: appointment.therapy_type,
-        doctorName: doctor?.name || null, // Ensure doctor exists
+        doctorName: doctor?.name,
         cancelledOn: appointment.cancelled_on,
         attended: appointment.attended,
       };
