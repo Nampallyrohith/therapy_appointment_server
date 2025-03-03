@@ -3,7 +3,6 @@ import { UserSchema } from "../schema/user.js";
 import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
 import { NotFound } from "../services/errors.js";
 import {
-  getAllDoctors,
   getAllDoctorsByTherapyId,
   getAllTherapies,
   getAvailableDates,
@@ -11,6 +10,12 @@ import {
   getAllAppointments,
 } from "../services/appointment.js";
 import { eventSchema } from "../schema/appointment.schema.js";
+import {
+  getAllDoctors,
+  getDoctorById,
+  updateDoctorProfile,
+} from "../services/doctors.js";
+import { doctorSchema } from "../schema/doctor.schema.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
 export const defineRoute = (handler: RouteHandler) => handler;
@@ -67,17 +72,6 @@ router.use(
       res.status(200).send({
         message: "Successfully therapies retrived.",
         therapies: response,
-      });
-    })
-  ),
-
-  router.get(
-    "/doctors",
-    defineRoute(async (req, res) => {
-      const response = await getAllDoctors();
-      res.status(200).send({
-        message: "Successfully doctors retrived.",
-        doctors: response,
       });
     })
   ),
@@ -169,6 +163,40 @@ router.get(
         error: err,
       });
     }
+  })
+);
+
+router.get(
+  "/user/doctors",
+  defineRoute(async (req, res) => {
+    const response = await getAllDoctors();
+    res.status(200).send({
+      message: "Successfully doctors retrived.",
+      doctors: response,
+    });
+  })
+),
+  router.get(
+    "/doctor/:doctorId",
+    defineRoute(async (req, res) => {
+      const { doctorId } = req.params;
+      const response = await getDoctorById(Number(doctorId));
+      res.status(200).send({
+        message: "Doctor successfully retrieved based on doctorId",
+        doctor: response,
+      });
+    })
+  );
+
+// TODO: Complete profile details of doctor
+router.post(
+  "/doctor/profile-details/:doctorId",
+  defineRoute(async (req, res) => {
+    const { doctorId } = req.params;
+    const doctor = doctorSchema.parse(req.body);
+    try {
+      await updateDoctorProfile(doctor, Number(doctorId));
+    } catch (error) {}
   })
 );
 

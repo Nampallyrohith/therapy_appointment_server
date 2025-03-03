@@ -3,6 +3,7 @@ import { connectAndQuery } from "./services/db/client.js";
 import env from "./config.js";
 import cors from "cors";
 import routes from "./handlers/routes.js";
+import morgan from "morgan";
 
 const app = express();
 
@@ -14,6 +15,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
+app.use(morgan("dev"));
 
 // Use the imported routes
 app.use("/api", routes);

@@ -27,15 +27,6 @@ export const eventSchema = z.object({
   therapyType: z.string(),
 });
 
-export type doctorType = {
-  id: string;
-  therapy_id: string;
-  name: string;
-  email: string;
-  avatar_url: string;
-  experience: number;
-  specialist_in: string;
-  about: string;
-};
+
 
 export type EventSchema = z.infer<typeof eventSchema>;
