@@ -26,4 +26,13 @@ export const doctorSchema = z.object({
   about: z.string(),
 });
 
+export const doctorAuthenticationSchema = z.object({
+  email: z.string().trim().min(1).email(),
+  password: z.string().trim().min(1),
+});
+
+export const doctorSignupSchema = doctorAuthenticationSchema.extend({
+  fullName: z.string().trim().min(1),
+});
+
 export type DoctorSchema = z.infer<typeof doctorSchema>;

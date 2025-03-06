@@ -1,7 +1,11 @@
 import { Router, Request, Response } from "express";
 import { UserSchema } from "../schema/user.js";
 import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
-import { NotFound } from "../services/errors.js";
+import {
+  DoctorCreationError,
+  NotFound,
+  PasswordNotMatch,
+} from "../services/errors.js";
 import {
   getAllDoctorsByTherapyId,
   getAllTherapies,
@@ -11,11 +15,17 @@ import {
 } from "../services/appointment.js";
 import { eventSchema } from "../schema/appointment.schema.js";
 import {
+  addNewDoctor,
   getAllDoctors,
   getDoctorById,
+  loginDoctor,
   updateDoctorProfile,
 } from "../services/doctors.js";
-import { doctorSchema } from "../schema/doctor.schema.js";
+import {
+  doctorAuthenticationSchema,
+  doctorSchema,
+  doctorSignupSchema,
+} from "../schema/doctor.schema.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
 export const defineRoute = (handler: RouteHandler) => handler;
@@ -163,6 +173,62 @@ router.use(
         res.status(500).send({
           error: err,
         });
+      }
+    })
+  )
+);
+
+router.use(
+  "doctor-authentication",
+  router.post(
+    "/login",
+    defineRoute(async (req, res) => {
+      const doctorLogin = doctorAuthenticationSchema.parse(req.body);
+      try {
+        const response = await loginDoctor(
+          doctorLogin.email,
+          doctorLogin.password
+        );
+        res.status(200).send({
+          message: "Login successful",
+          token: response.token,
+          doctor: response.doctor,
+        });
+      } catch (error) {
+        if (error instanceof PasswordNotMatch) {
+          res.status(400).send({
+            error: "Invalid credentials.",
+          });
+        }
+        if (error instanceof NotFound) {
+          res.status(400).send({
+            error: "Account doesn't exists.",
+          });
+        }
+        console.log(error);
+      }
+    })
+  ),
+
+  router.post(
+    "/signup",
+    defineRoute(async (req, res) => {
+      const doctorSignup = doctorSignupSchema.parse(req.body);
+      try {
+        const response = await addNewDoctor(
+          doctorSignup.fullName,
+          doctorSignup.email,
+          doctorSignup.password
+        );
+        res.status(200).send({
+          message: "Doctor registered successfully.",
+        });
+      } catch (error) {
+        if (error instanceof DoctorCreationError) {
+          res.status(500).send({
+            error: "Something went wrong.",
+          });
+        }
       }
     })
   )
