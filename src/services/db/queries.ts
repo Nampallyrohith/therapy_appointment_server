@@ -1,5 +1,7 @@
 export const QUERIES = {
   getUserByEmailQuery: "SELECT * FROM users WHERE email = $1;",
+  getDoctorByEmailQuery:
+    "SELECT id, therapy_id, name, email, avatar_url, experience, specialist_in, about, is_profile FROM doctors WHERE email = $1;",
   insertNewUserQuery:
     "INSERT INTO users (google_user_id, name, email, access_token, provider_token, refresh_token, expires_at, avatar_url, phone, gender, dob, created_at, last_sign_in_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);",
   getUserByGoogleUserIdQuery: "SELECT * FROM users WHERE google_user_id = $1;",
@@ -10,7 +12,8 @@ export const QUERIES = {
     "select id, therapy_id, name, avatar_url, email from doctors where therapy_id = $1;",
   getAvailableDatesQuery:
     "select * from doctors_datetime where doctor_id = $1;",
-  getAllDoctosQuery: "Select * from doctors;",
+  getAllDoctosQuery:
+    "Select id, therapy_id, name, email, avatar_url, experience, specialist_in, about, is_profile from doctors;",
   insertAppointmentEventQuery:
     "Insert into appointments(user_id, summary, description, start_time, end_time, time_zone, hangout_link, created_at, doctor_id, event_id, therapy_type) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) returning id;",
   insertAppoinmentAttendeesQuery:
@@ -18,5 +21,11 @@ export const QUERIES = {
   getBookedAppointmentsQuery:
     "select start_time from appointments where doctor_id=$1 and DATE(start_time)=$2;",
   getAllAppointmentsQuery: "select * from appointments where user_id = $1;",
-  getDoctorById: "select * from doctors where id = $1;",
+  getDoctorByIdQuery:
+    "select id, therapy_id, name, email, avatar_url, experience, specialist_in, about, is_profile from doctors where id = $1;",
+  addNewDoctorQuery:
+    "INSERT INTO doctors(full_name, email, password) VALUES ($1, $2, $3)",
+  doctorExistsQuery: "select exists(select 1 from doctors where id = $1);",
+  updateDoctorProfileQuery:
+    "update doctors set name=$2, avatar_url=$3, therapy_id=$4, experience=$5, specialist_in=$6, about=$7 where id=$1;",
 };
