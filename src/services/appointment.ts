@@ -1,9 +1,10 @@
-import {  EventSchema } from "../schema/appointment.schema.js";
+import { EventSchema } from "../schema/appointment.schema.js";
 import { doctorType } from "../schema/doctor.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
 import { getUserById } from "./user.js";
+import cron from "node-cron";
 
 export const getAllTherapies = async () => {
   const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
@@ -143,7 +144,7 @@ export const insertEventInfo = async (
   const appointmentId = result.rows[0].id;
   await Promise.all(
     event.attendees.map((attendee) =>
-      client.query(QUERIES.insertAppoinmentAttendeesQuery, [
+      client.query(QUERIES.insertAppointmentAttendeesQuery, [
         appointmentId,
         attendee.email,
       ])
@@ -194,9 +195,37 @@ export const getAllAppointments = async (userId: string) => {
         createdAt: new Date(appointment.created_at).toLocaleString(),
         typeOfTherapy: appointment.therapy_type,
         doctorName: doctor?.name,
-        cancelledOn: appointment.cancelled_on,
+        cancelledOn:
+          appointment.cancelled_on !== null &&
+          new Date(appointment.cancelled_on).toLocaleString(),
+        cancelReason:
+          appointment.cancel_reason !== null && appointment.cancel_reason,
         attended: appointment.attended,
       };
     })
   );
 };
+
+export const cancelAppointment = async (
+  appointmentId: number,
+  cancelReason: string
+) => {
+  const cancelledOn = new Date();
+
+  await client.query(QUERIES.insertCancelAppointmentQuery, [
+    appointmentId,
+    cancelReason,
+    cancelledOn,
+  ]);
+
+  await client.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
+};
+
+cron.schedule("0 * * * *", async () => {
+  try {
+    await client.query(QUERIES.updatePreviousStatusQuery);
+    console.log("Appointments updated successfully.");
+  } catch (error) {
+    console.log("Error updating appointment status:", error);
+  }
+});
