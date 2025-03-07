@@ -9,6 +9,7 @@ import {
   getAvailableDates,
   insertEventInfo,
   getAllAppointments,
+  cancelAppointment,
 } from "../services/appointment.js";
 import { eventSchema } from "../schema/appointment.schema.js";
 
@@ -128,6 +129,7 @@ router.use(
       });
     })
   ),
+
   router.post(
     "/create-event/:googleUserId",
     defineRoute(async (req, res) => {
@@ -168,6 +170,25 @@ router.get(
       res.status(500).send({
         error: err,
       });
+    }
+  })
+);
+
+router.post(
+  "/user/appointment/cancel/:appointmentId",
+  defineRoute(async (req, res) => {
+    try {
+      const { appointmentId } = req.params;
+      const { cancelReason } = req.body;
+
+      await cancelAppointment(parseInt(appointmentId), cancelReason);
+
+      res.status(200).json({
+        message: "Appointment cancelled successfully",
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Failed to cancel appointment" });
     }
   })
 );

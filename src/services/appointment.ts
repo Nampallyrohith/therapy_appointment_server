@@ -188,6 +188,15 @@ export const getAllAppointments = async (userId: string) => {
         return date.toLocaleDateString("en-GB");
       };
 
+      const appointmentEndTime = new Date(appointment.end_time);
+      const currentTime = new Date();
+
+      let status = appointment.status;
+      if (appointment.status === "upcoming") {
+        status =
+          appointmentEndTime < currentTime ? "previous" : appointment.status;
+      }
+
       return {
         id: appointment.id,
         userId: appointment.user_id,
@@ -203,13 +212,32 @@ export const getAllAppointments = async (userId: string) => {
         )}`,
         timeZone: appointment.time_zone,
         hangoutLink: appointment.hangout_link,
-        status: appointment.status,
+        status,
         createdAt: new Date(appointment.created_at).toLocaleString(),
         typeOfTherapy: appointment.therapy_type,
         doctorName: doctor?.name,
-        cancelledOn: appointment.cancelled_on,
+        cancelledOn:
+          appointment.cancelled_on !== null &&
+          new Date(appointment.cancelled_on).toLocaleString(),
+        cancelReason:
+          appointment.cancel_reason !== null && appointment.cancel_reason,
         attended: appointment.attended,
       };
     })
   );
+};
+
+export const cancelAppointment = async (
+  appointmentId: number,
+  cancelReason: string
+) => {
+  const cancelledOn = new Date();
+
+  await client.query(QUERIES.insertCancelAppointmentQuery, [
+    appointmentId,
+    cancelReason,
+    cancelledOn,
+  ]);
+
+  await client.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
 };

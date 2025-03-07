@@ -68,8 +68,14 @@ CREATE TABLE IF NOT EXISTS appointments (
     status status_enum not null default 'upcoming',
     created_at TIMESTAMP not null,
     therapy_type TEXT not null,
-    cancelled_on TIMESTAMP,
     attended BOOLEAN
+);
+
+CREATE TABLE IF NOT EXISTS cancelled_appointments(
+    id SERIAL PRIMARY KEY,
+    cancelled_on TIMESTAMP,
+    appointment_id INTEGER NOT NULL references appointments(id) on delete cascade,
+    cancel_reason TEXT
 );
 
 CREATE TABLE IF NOT EXISTS appointments_attendees(

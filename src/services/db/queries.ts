@@ -17,6 +17,25 @@ export const QUERIES = {
     "Insert into appointments_attendees(appointment_id, email) values($1, $2);",
   getBookedAppointmentsQuery:
     "select start_time from appointments where doctor_id=$1 and DATE(start_time)=$2;",
-  getAllAppointmentsQuery: "select * from appointments where user_id = $1;",
+  getAllAppointmentsQuery: `
+    SELECT
+      a.*,
+      ca.cancel_reason, ca.cancelled_on
+    FROM
+      appointments a
+      LEFT JOIN cancelled_appointments ca
+      ON a.id = ca.appointment_id
+    WHERE
+      a.user_id = $1;
+  `,
   getDoctorById: "select * from doctors where id = $1;",
+  insertCancelAppointmentQuery: `
+    INSERT INTO cancelled_appointments (appointment_id, cancel_reason, cancelled_on)
+    VALUES ($1, $2, $3);
+  `,
+  updateCancelStatusQuery: `
+    UPDATE appointments
+    SET status = 'cancelled'
+    WHERE id = $1;
+  `,
 };
