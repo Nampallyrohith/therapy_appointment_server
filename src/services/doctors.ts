@@ -21,7 +21,7 @@ export const getDoctorByEmail = async (email: string) => {
 
 // All doctors
 export const getAllDoctors = async () => {
-  const doctors = (await client.query(QUERIES.getAllDoctosQuery)).rows;
+  const doctors = (await client.query(QUERIES.getAllDoctorsQuery)).rows;
   return doctors.map((doctor) => ({
     id: doctor.id,
     therapyId: doctor.therapy_id,

@@ -1,9 +1,10 @@
-import {  EventSchema } from "../schema/appointment.schema.js";
+import { EventSchema } from "../schema/appointment.schema.js";
 import { doctorType } from "../schema/doctor.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
 import { getUserById } from "./user.js";
+import cron from "node-cron";
 
 export const getAllTherapies = async () => {
   const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
@@ -143,7 +144,7 @@ export const insertEventInfo = async (
   const appointmentId = result.rows[0].id;
   await Promise.all(
     event.attendees.map((attendee) =>
-      client.query(QUERIES.insertAppoinmentAttendeesQuery, [
+      client.query(QUERIES.insertAppointmentAttendeesQuery, [
         appointmentId,
         attendee.email,
       ])
@@ -175,15 +176,6 @@ export const getAllAppointments = async (userId: string) => {
         return date.toLocaleDateString("en-GB");
       };
 
-      const appointmentEndTime = new Date(appointment.end_time);
-      const currentTime = new Date();
-
-      let status = appointment.status;
-      if (appointment.status === "upcoming") {
-        status =
-          appointmentEndTime < currentTime ? "previous" : appointment.status;
-      }
-
       return {
         id: appointment.id,
         userId: appointment.user_id,
@@ -199,7 +191,7 @@ export const getAllAppointments = async (userId: string) => {
         )}`,
         timeZone: appointment.time_zone,
         hangoutLink: appointment.hangout_link,
-        status,
+        status: appointment.status,
         createdAt: new Date(appointment.created_at).toLocaleString(),
         typeOfTherapy: appointment.therapy_type,
         doctorName: doctor?.name,
@@ -228,3 +220,12 @@ export const cancelAppointment = async (
 
   await client.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
 };
+
+cron.schedule("0 * * * *", async () => {
+  try {
+    await client.query(QUERIES.updatePreviousStatusQuery);
+    console.log("Appointments updated successfully.");
+  } catch (error) {
+    console.log("Error updating appointment status:", error);
+  }
+});

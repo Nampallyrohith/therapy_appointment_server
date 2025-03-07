@@ -153,6 +153,25 @@ router.use(
           return res.status(500).json({ error: error });
         }
       })
+    ),
+
+    router.post(
+      "/cancel/:appointmentId",
+      defineRoute(async (req, res) => {
+        try {
+          const { appointmentId } = req.params;
+          const { cancelReason } = req.body;
+
+          await cancelAppointment(parseInt(appointmentId), cancelReason);
+
+          res.status(200).json({
+            message: "Appointment cancelled successfully",
+          });
+        } catch (error) {
+          console.log(error);
+          res.status(500).json({ error: "Failed to cancel appointment" });
+        }
+      })
     )
   ),
   router.get(
@@ -268,25 +287,6 @@ router.post(
     try {
       await updateDoctorProfile(doctor, Number(doctorId));
     } catch (error) {}
-  })
-);
-
-router.post(
-  "/user/appointment/cancel/:appointmentId",
-  defineRoute(async (req, res) => {
-    try {
-      const { appointmentId } = req.params;
-      const { cancelReason } = req.body;
-
-      await cancelAppointment(parseInt(appointmentId), cancelReason);
-
-      res.status(200).json({
-        message: "Appointment cancelled successfully",
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "Failed to cancel appointment" });
-    }
   })
 );
 

@@ -33,6 +33,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "node-cron": "^3.0.3",
     "path": "^0.12.7",
     "pg": "^8.13.1",
     "tsc-watch": "^6.2.1",
@@ -48,6 +49,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.10.3",
+    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.11.10",
     "typescript": "^5.7.2"
   }
