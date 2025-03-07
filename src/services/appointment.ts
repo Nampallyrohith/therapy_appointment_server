@@ -1,4 +1,5 @@
-import { doctorType, EventSchema } from "../schema/appointment.schema.js";
+import {  EventSchema } from "../schema/appointment.schema.js";
+import { doctorType } from "../schema/doctor.schema.js";
 import { client } from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
@@ -9,20 +10,6 @@ export const getAllTherapies = async () => {
   return therapies.map((therapy) => ({
     id: therapy.id,
     therapyName: therapy.therapy_name,
-  }));
-};
-
-export const getAllDoctors = async () => {
-  const doctors = (await client.query(QUERIES.getAllDoctosQuery)).rows;
-  return doctors.map((doctor) => ({
-    id: doctor.id,
-    therapyId: doctor.therapy_id,
-    name: doctor.name,
-    email: doctor.email,
-    avatarUrl: doctor.avatar_url,
-    experience: doctor.experience,
-    specialistIn: doctor.specialist_in,
-    about: doctor.about,
   }));
 };
 
@@ -178,7 +165,7 @@ export const getAllAppointments = async (userId: string) => {
 
   return Promise.all(
     appointments.map(async (appointment) => {
-      const doctorResult = await client.query(QUERIES.getDoctorById, [
+      const doctorResult = await client.query(QUERIES.getDoctorByIdQuery, [
         appointment.doctor_id,
       ]);
       const doctor: doctorType = doctorResult.rows[0];

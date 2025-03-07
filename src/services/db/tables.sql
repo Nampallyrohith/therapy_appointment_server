@@ -38,13 +38,15 @@ CREATE TABLE IF NOT EXISTS therapies (
 -- TODO: Make it not null to email and avatar_url
 CREATE TABLE IF NOT EXISTS doctors (
     id SERIAL PRIMARY KEY,
-    therapy_id VARCHAR(100) not null,
+    therapy_id VARCHAR(100),
     name TEXT NOT NULL,
-    email VARCHAR(100) UNIQUE,
+    email VARCHAR(100) UNIQUE not null,
     avatar_url TEXT,
-    experience INTEGER not null,
-    specialist_in TEXT not null,
-    about text not null
+    experience INTEGER,
+    specialist_in TEXT,
+    about text
+    password text,
+    is_profile BOOLEAN default false
 );
 
 CREATE TABLE IF NOT EXISTS doctors_datetime (
