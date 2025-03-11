@@ -2,9 +2,11 @@ import { Router, Request, Response } from "express";
 import { UserSchema } from "../schema/user.js";
 import { getUserByGoogleId, insertUserDetails } from "../services/user.js";
 import {
+  AutoIncrementFailure,
   DoctorCreationError,
   NotFound,
   PasswordNotMatch,
+  UniqueConstraintViolationError,
 } from "../services/errors.js";
 import {
   getAllDoctorsByTherapyId,
@@ -200,7 +202,7 @@ router.use(
 );
 
 router.use(
-  "doctor-authentication",
+  "/doctor-authentication",
   router.post(
     "/login",
     defineRoute(async (req, res) => {
@@ -236,7 +238,7 @@ router.use(
     defineRoute(async (req, res) => {
       const doctorSignup = doctorSignupSchema.parse(req.body);
       try {
-        const response = await addNewDoctor(
+        await addNewDoctor(
           doctorSignup.fullName,
           doctorSignup.email,
           doctorSignup.password
@@ -245,6 +247,16 @@ router.use(
           message: "Doctor registered successfully.",
         });
       } catch (error) {
+        if (error instanceof AutoIncrementFailure) {
+          res.status(400).send({
+            error: error.message,
+          });
+        }
+        if (error instanceof UniqueConstraintViolationError) {
+          res.status(400).send({
+            error: error.message,
+          });
+        }
         if (error instanceof DoctorCreationError) {
           res.status(500).send({
             error: "Something went wrong.",
@@ -279,14 +291,20 @@ router.get(
 );
 
 // TODO: Complete profile details of doctor
-router.post(
+router.put(
   "/doctor/profile-details/:doctorId",
   defineRoute(async (req, res) => {
     const { doctorId } = req.params;
-    const doctor = doctorSchema.parse(req.body);
+    const doctor = req.body;
     try {
       await updateDoctorProfile(doctor, Number(doctorId));
-    } catch (error) {}
+      res.status(200).send({ message: "Successfully updated." });
+    } catch (error) {
+      if (error instanceof NotFound) {
+        res.status(400).send({ error: error.message });
+      }
+      res.status(500).send({ error: error });
+    }
   })
 );
 

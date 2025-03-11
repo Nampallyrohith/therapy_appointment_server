@@ -24,3 +24,5 @@ export class DatabaseError extends Error {
   }
 }
 export class DoctorCreationError extends Error {}
+export class AutoIncrementFailure extends Error {}
+export class UniqueConstraintViolationError extends Error {}

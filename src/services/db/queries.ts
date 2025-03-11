@@ -4,7 +4,7 @@ export const QUERIES = {
   `,
 
   getDoctorByEmailQuery: `
-    SELECT id, therapy_id, name, email, avatar_url, experience, 
+    SELECT id, therapy_id, name, password, email, avatar_url, experience, 
            specialist_in, about, is_profile 
     FROM doctors WHERE email = $1;
   `,
@@ -82,7 +82,7 @@ export const QUERIES = {
 
   getDoctorByIdQuery: `
     SELECT id, therapy_id, name, email, avatar_url, experience, 
-           specialist_in, about, is_profile 
+           specialist_in, about, is_profile, age, gender, qualification
     FROM doctors WHERE id = $1;
   `,
 
@@ -104,7 +104,7 @@ export const QUERIES = {
   `,
 
   addNewDoctorQuery: `
-    INSERT INTO doctors (full_name, email, password) 
+    INSERT INTO doctors (name, email, password) 
     VALUES ($1, $2, $3);
   `,
 
@@ -114,8 +114,16 @@ export const QUERIES = {
 
   updateDoctorProfileQuery: `
     UPDATE doctors 
-    SET name = $2, avatar_url = $3, therapy_id = $4, experience = $5, 
-        specialist_in = $6, about = $7 
+    SET name = $2, 
+        avatar_url = $3, 
+        therapy_id = $4, 
+        experience = $5, 
+        specialist_in = $6, 
+        about = $7, 
+        gender=$8, 
+        age=$9, 
+        qualification=$10,
+        is_profile=true
     WHERE id = $1;
   `,
 };

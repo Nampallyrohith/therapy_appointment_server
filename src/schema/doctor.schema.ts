@@ -21,9 +21,12 @@ export const doctorSchema = z.object({
   name: z.string().trim().min(1),
   email: z.string().trim().min(1).email(),
   avatarUrl: z.string(),
-  experience: z.string(),
+  experience: z.number(),
   specialistIn: z.string(),
   about: z.string(),
+  qualification: z.string(),
+  gender: z.enum(["Male", "Female"]),
+  age: z.number(),
 });
 
 export const doctorAuthenticationSchema = z.object({

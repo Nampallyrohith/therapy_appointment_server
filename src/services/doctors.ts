@@ -4,10 +4,13 @@ import bcrypt from "bcrypt";
 import env from "../config.js";
 import jwt from "jsonwebtoken";
 import {
+  AutoIncrementFailure,
+  DatabaseError,
   DoctorAlreadyExistsError,
   DoctorCreationError,
   NotFound,
   PasswordNotMatch,
+  UniqueConstraintViolationError,
 } from "./errors.js";
 import { DoctorSchema } from "../schema/doctor.schema.js";
 
@@ -15,24 +18,25 @@ export const getDoctorByEmail = async (email: string) => {
   const response = await (
     await client.query(QUERIES.getDoctorByEmailQuery, [email])
   ).rows[0];
-  console.log(response);
   return response;
 };
 
 // All doctors
 export const getAllDoctors = async () => {
   const doctors = (await client.query(QUERIES.getAllDoctorsQuery)).rows;
-  return doctors.map((doctor) => ({
-    id: doctor.id,
-    therapyId: doctor.therapy_id,
-    name: doctor.name,
-    email: doctor.email,
-    avatarUrl: doctor.avatar_url,
-    experience: doctor.experience,
-    specialistIn: doctor.specialist_in,
-    about: doctor.about,
-    isProfile: doctor.is_profile,
-  }));
+  return doctors
+    .filter((doctor) => doctor.is_profile)
+    .map((doctor) => ({
+      id: doctor.id,
+      therapyId: doctor.therapy_id,
+      name: doctor.name,
+      email: doctor.email,
+      avatarUrl: doctor.avatar_url,
+      experience: doctor.experience,
+      specialistIn: doctor.specialist_in,
+      about: doctor.about,
+      isProfile: doctor.is_profile,
+    }));
 };
 
 // Sign up
@@ -52,7 +56,20 @@ export const addNewDoctor = async (
       email,
       hashedNewPassword,
     ]);
-  } catch (error) {
+  } catch (e) {
+    if (e instanceof DatabaseError) {
+      if (e.code === "23502") {
+        throw new AutoIncrementFailure(
+          "null value in column id of relation doctors violates not-null constraint"
+        );
+      }
+      if (e.code === "23505" && e.constraint === "doctors_pkey") {
+        throw new UniqueConstraintViolationError(
+          "A doctor with this ID already exists. Please try again."
+        );
+      }
+    }
+    console.log(e);
     throw new DoctorCreationError("Error creating new doctor");
   }
 };
@@ -61,6 +78,7 @@ export const addNewDoctor = async (
 export const loginDoctor = async (email: string, password: string) => {
   const doctor = await getDoctorByEmail(email);
   if (!doctor) {
+    console.log("Doctor doesn't exist.");
     throw new NotFound("Doctor doesn't exist. Please create an account.");
   }
   const response = await bcrypt.compare(password, doctor.password);
@@ -101,6 +119,9 @@ export const getDoctorById = async (doctorId: number) => {
     specialistIn: result.specialist_in,
     about: result.about,
     isProfile: result.is_profile,
+    age: result.age,
+    qualification: result.qualification,
+    gender: result.gender,
   };
 };
 
@@ -124,6 +145,9 @@ export const updateDoctorProfile = async (
       doctor.experience,
       doctor.specialistIn,
       doctor.about,
+      doctor.gender,
+      doctor.age,
+      doctor.qualification,
     ]);
   } catch (error) {
     throw error;

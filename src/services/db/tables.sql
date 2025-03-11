@@ -1,5 +1,6 @@
 -- ENUM
-create type status_enum as enum('upcoming', 'cancelled', 'previous');   
+create type status_enum as enum('upcoming', 'cancelled', 'previous'); 
+create type gender_enum as enum("Male", "Female");  
 
 
 -- Tables
@@ -35,18 +36,21 @@ CREATE TABLE IF NOT EXISTS therapies (
     therapy_name TEXT NOT NULL
 );
 
--- TODO: Make it not null to email and avatar_url
+
 CREATE TABLE IF NOT EXISTS doctors (
     id SERIAL PRIMARY KEY,
     therapy_id VARCHAR(100),
     name TEXT NOT NULL,
     email VARCHAR(100) UNIQUE not null,
+    password text not null,
     avatar_url TEXT,
     experience INTEGER,
     specialist_in TEXT,
-    about text
-    password text,
+    about text,
     is_profile BOOLEAN default false
+    age text, 
+    qualification text, 
+    gender status_enum
 );
 
 CREATE TABLE IF NOT EXISTS doctors_datetime (
