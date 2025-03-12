@@ -35,6 +35,11 @@ export const getAvailableDates = async (doctorIdStr: string, date?: string) => {
     await client.query(QUERIES.getAvailableDatesQuery, [doctorId])
   ).rows[0];
 
+  if (!datetime || !datetime.leave_dates) {
+    console.error("datetime.leave_dates is missing");
+    return [];
+  }
+
   const leaveDates = datetime.leave_dates
     .replace(/[\[\]]/g, "")
     .split(", ")
@@ -73,16 +78,18 @@ export const getAvailableTimes = async (
     [doctorId, date]
   );
 
-  const bookedTimes: string[] = bookedAppointments.rows.map((appointment) =>
-    convertUTCToIST(appointment.start_time)
-  );
+  const bookedTimes: string[] = bookedAppointments.rows
+    .map((appointment) =>
+      appointment.start_time ? convertUTCToIST(appointment.start_time) : null
+    )
+    .filter((time) => time !== null) as string[];
 
   const availableTimeSlots: string[] = datetime.available_time
     ? datetime.available_time
         .replace(/[\[\]]/g, "")
         .split(", ")
         .map((t: string) => t.trim())
-    : [];
+    : ["10:00AM", "11:30AM", "2:30PM", "4:00PM"];
 
   const now = new Date();
   const todayDate = now.toISOString().split("T")[0];
