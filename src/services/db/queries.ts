@@ -42,8 +42,11 @@ export const QUERIES = {
   `,
 
   getAvailableDatesQuery: `
-    SELECT * FROM doctors_datetime WHERE doctor_id = $1;
+    SELECT * FROM doctors_leave_date WHERE doctor_id = $1 AND status=upcoming;
   `,
+
+  getAvailableTimesQuery: `
+  SELECT * FROM doctors_default_available_time WHERE doctor_id=$1;`,
 
   getAllDoctorsQuery: `
     SELECT id, therapy_id, name, email, avatar_url, experience, 
@@ -125,5 +128,21 @@ export const QUERIES = {
         qualification=$10,
         is_profile=true
     WHERE id = $1;
+  `,
+
+  insertingLeaveDateQuery: `
+    INSERT INTO doctors_leave_date (title, description, leave_dates, doctor_id)
+    VALUES($1, $2, $3, $4);
+  `,
+
+  getAllLeaveDatesByIdQuery: `
+    SELECT * FROM doctors_leave_date WHERE doctor_id=$1;
+  `,
+
+  cancelLeaveDatesQuery: `
+    UPDATE doctors_leave_date
+    SET status='cancelled'
+    WHERE 
+      doctor_id = $1 and id=$2;
   `,
 };

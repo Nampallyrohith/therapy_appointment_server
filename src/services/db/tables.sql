@@ -50,14 +50,24 @@ CREATE TABLE IF NOT EXISTS doctors (
     is_profile BOOLEAN default false
     age text, 
     qualification text, 
-    gender status_enum
+    gender gender_enum
 );
 
-CREATE TABLE IF NOT EXISTS doctors_datetime (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS doctors_default_available_time (
+    id SERIAL primary key,
     doctor_id INTEGER not null references doctors(id) on delete cascade,
-    leave_dates TEXT,
-    available_time TEXT
+    available_time text
+);
+
+
+CREATE TABLE IF NOT EXISTS doctors_leave_date (
+    id SERIAL primary key,
+    doctor_id INTEGER not null references doctors(id) on delete cascade,
+    title text,
+    description text,
+    leave_dates text,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status status_enum default 'upcoming',
 );
 
 CREATE TABLE IF NOT EXISTS appointments (

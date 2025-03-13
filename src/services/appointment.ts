@@ -29,29 +29,24 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
   }));
 };
 
-export const getAvailableDates = async (doctorIdStr: string, date?: string) => {
+export const getAvailableDates = async (doctorIdStr: string) => {
   const doctorId = Number(doctorIdStr);
-  const datetime = (
-    await client.query(QUERIES.getAvailableDatesQuery, [doctorId])
-  ).rows[0];
+  const date = (await client.query(QUERIES.getAvailableDatesQuery, [doctorId]))
+    .rows[0];
 
-  if (!datetime || !datetime.leave_dates) {
-    console.error("datetime.leave_dates is missing");
+  if (!date || !date.leave_dates) {
+    console.error("date.leave_dates is missing");
     return [];
   }
 
-  const leaveDates = datetime.leave_dates
+  const leaveDates = date.leave_dates
     .replace(/[\[\]]/g, "")
     .split(", ")
     .map((date: string) => date.trim());
 
-  if (date) {
-    return getAvailableTimes(doctorId, date, datetime);
-  }
-
   return {
-    id: datetime.id,
-    doctorId: datetime.doctor_id,
+    id: date.id,
+    doctorId: date.doctor_id,
     leaveDates,
   };
 };
@@ -68,11 +63,10 @@ const convertUTCToIST = (date: string) => {
   return `${hours}:${minutes}${ampm}`;
 };
 
-export const getAvailableTimes = async (
-  doctorId: number,
-  date: string,
-  datetime: { id: number; doctor_id: number; available_time: string | null }
-) => {
+export const getAvailableTimes = async (doctorId: number, date: string) => {
+  const time = (await client.query(QUERIES.getAvailableTimesQuery, [doctorId]))
+    .rows[0];
+
   const bookedAppointments = await client.query(
     QUERIES.getBookedAppointmentsQuery,
     [doctorId, date]
@@ -84,8 +78,8 @@ export const getAvailableTimes = async (
     )
     .filter((time) => time !== null) as string[];
 
-  const availableTimeSlots: string[] = datetime.available_time
-    ? datetime.available_time
+  const availableTimeSlots: string[] = time.available_time
+    ? time.available_time
         .replace(/[\[\]]/g, "")
         .split(", ")
         .map((t: string) => t.trim())
@@ -118,8 +112,8 @@ export const getAvailableTimes = async (
   });
 
   return {
-    id: datetime.id,
-    doctorId: datetime.doctor_id,
+    id: time.id,
+    doctorId: time.doctor_id,
     availableTimeSlots: filteredTimeSlots,
   };
 };
