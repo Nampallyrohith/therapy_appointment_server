@@ -1,18 +1,18 @@
-import { client } from "./db/client.js";
+import pool from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { UserType } from "../schema/user.js";
 import { NotFound } from "./errors.js";
 
 export const getUserByEmail = async (email: string) => {
   const response = await (
-    await client.query(QUERIES.getUserByEmailQuery, [email])
+    await pool.query(QUERIES.getUserByEmailQuery, [email])
   ).rows[0];
   return response;
 };
 
 export const getUserById = async (googleUserId: string) => {
   const response = await (
-    await client.query(QUERIES.getUserByGoogleUserIdQuery, [googleUserId])
+    await pool.query(QUERIES.getUserByGoogleUserIdQuery, [googleUserId])
   ).rows[0];
   return response;
 };
@@ -35,7 +35,7 @@ export const insertUserDetails = async (user: UserType) => {
   } = user;
   const userExists = await getUserByEmail(email);
   if (userExists) {
-    await client.query(QUERIES.updateUserQuery, [
+    await pool.query(QUERIES.updateUserQuery, [
       googleUserId,
       name,
       email,
@@ -51,7 +51,7 @@ export const insertUserDetails = async (user: UserType) => {
       lastSignInAt,
     ]);
   } else {
-    await client.query(QUERIES.insertNewUserQuery, [
+    await pool.query(QUERIES.insertNewUserQuery, [
       googleUserId,
       name,
       email,
