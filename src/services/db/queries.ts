@@ -42,7 +42,7 @@ export const QUERIES = {
   `,
 
   getAvailableDatesQuery: `
-    SELECT * FROM doctors_leave_date WHERE doctor_id = $1 AND status=upcoming;
+    SELECT * FROM doctors_leave_date WHERE doctor_id = $1 AND status='upcoming';
   `,
 
   getAvailableTimesQuery: `
@@ -100,10 +100,22 @@ export const QUERIES = {
     WHERE id = $1;
   `,
 
-  updatePreviousStatusQuery: `
+  updateAppointmentPreviousStatusQuery: `
     UPDATE appointments
     SET status = 'previous'
     WHERE status='upcoming' AND start_time < NOW();
+  `,
+
+  // TODO: Query is not working properly.
+  updatePreviousStatusQuery: `
+    UPDATE doctors_leave_date
+    SET status = 'previous'
+    WHERE status = 'upcoming'
+    AND EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements_text(leave_dates::jsonb) AS leave_date
+        WHERE leave_date::DATE < CURRENT_DATE
+    );
   `,
 
   addNewDoctorQuery: `

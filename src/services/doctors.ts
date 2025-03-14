@@ -13,6 +13,7 @@ import {
   UniqueConstraintViolationError,
 } from "./errors.js";
 import { DoctorSchema, LeaveDatesSchema } from "../schema/doctor.schema.js";
+import cron from "node-cron";
 
 export const getDoctorByEmail = async (email: string) => {
   const response = await (
@@ -220,3 +221,13 @@ export const cancelLeaveDates = async (doctorId: number, id: number) => {
     console.log(error);
   }
 };
+
+// Automatically upating status from upcoming to status
+cron.schedule("*/10 * * * *", async () => {
+  try {
+    await client.query(QUERIES.updatePreviousStatusQuery);
+    console.log("Leave dates updated successfully.");
+  } catch (error) {
+    console.log("Error updating leave dates status:", error);
+  }
+});

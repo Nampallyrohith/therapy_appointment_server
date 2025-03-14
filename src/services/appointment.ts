@@ -222,9 +222,10 @@ export const cancelAppointment = async (
   await client.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
 };
 
-cron.schedule("0 * * * *", async () => {
+// Automatically upating status from upcoming to status
+cron.schedule("*/10 * * * *", async () => {
   try {
-    await client.query(QUERIES.updatePreviousStatusQuery);
+    await client.query(QUERIES.updateAppointmentPreviousStatusQuery);
     console.log("Appointments updated successfully.");
   } catch (error) {
     console.log("Error updating appointment status:", error);

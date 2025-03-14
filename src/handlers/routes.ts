@@ -295,7 +295,6 @@ router.get(
   })
 );
 
-// TODO: Complete profile details of doctor
 router.put(
   "/doctor/profile-details/:doctorId",
   defineRoute(async (req, res) => {
@@ -317,7 +316,6 @@ router.post(
   "/doctor/:doctorId/leaves-dates",
   defineRoute(async (req, res) => {
     const { doctorId } = req.params;
-    console.log(req.body);
     const calendarForm = leaveDatesSchema.parse(req.body);
 
     try {
@@ -339,7 +337,6 @@ router.get(
 
     try {
       const response = await getAllLeaveDatesById(Number(doctorId));
-      console.log(response);
       res
         .status(200)
         .send({ message: "Successfully fetched.", leaveDetails: response });
