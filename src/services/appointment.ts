@@ -1,13 +1,13 @@
 import { EventSchema } from "../schema/appointment.schema.js";
 import { doctorType } from "../schema/doctor.schema.js";
-import { client } from "./db/client.js";
+import pool from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import { NotFound } from "./errors.js";
 import { getUserById } from "./user.js";
 import cron from "node-cron";
 
 export const getAllTherapies = async () => {
-  const therapies = (await client.query(QUERIES.getTherapiesQuery)).rows;
+  const therapies = (await pool.query(QUERIES.getTherapiesQuery)).rows;
   return therapies.map((therapy) => ({
     id: therapy.id,
     therapyName: therapy.therapy_name,
@@ -16,7 +16,7 @@ export const getAllTherapies = async () => {
 
 export const getAllDoctorsByTherapyId = async (therapyId: string) => {
   const doctors = (
-    await client.query(QUERIES.getAllDoctorsByTherapyIdQuery, [therapyId])
+    await pool.query(QUERIES.getAllDoctorsByTherapyIdQuery, [therapyId])
   ).rows;
   return doctors.map((doctor) => ({
     id: doctor.id,
@@ -31,7 +31,7 @@ export const getAllDoctorsByTherapyId = async (therapyId: string) => {
 
 export const getAvailableDates = async (doctorIdStr: string) => {
   const doctorId = Number(doctorIdStr);
-  const date = (await client.query(QUERIES.getAvailableDatesQuery, [doctorId]))
+  const date = (await pool.query(QUERIES.getAvailableDatesQuery, [doctorId]))
     .rows[0];
 
   if (!date || !date.leave_dates) {
@@ -64,10 +64,10 @@ const convertUTCToIST = (date: string) => {
 };
 
 export const getAvailableTimes = async (doctorId: number, date: string) => {
-  const time = (await client.query(QUERIES.getAvailableTimesQuery, [doctorId]))
+  const time = (await pool.query(QUERIES.getAvailableTimesQuery, [doctorId]))
     .rows[0];
 
-  const bookedAppointments = await client.query(
+  const bookedAppointments = await pool.query(
     QUERIES.getBookedAppointmentsQuery,
     [doctorId, date]
   );
@@ -128,7 +128,7 @@ export const insertEventInfo = async (
   }
 
   const currentDateTime = new Date();
-  const result = await client.query(QUERIES.insertAppointmentEventQuery, [
+  const result = await pool.query(QUERIES.insertAppointmentEventQuery, [
     googleUserId,
     event.summary,
     event.description,
@@ -145,7 +145,7 @@ export const insertEventInfo = async (
   const appointmentId = result.rows[0].id;
   await Promise.all(
     event.attendees.map((attendee) =>
-      client.query(QUERIES.insertAppointmentAttendeesQuery, [
+      pool.query(QUERIES.insertAppointmentAttendeesQuery, [
         appointmentId,
         attendee.email,
       ])
@@ -162,12 +162,12 @@ export const getAllAppointments = async (userId: string) => {
   }
 
   const appointments = (
-    await client.query(QUERIES.getAllAppointmentsQuery, [userId])
+    await pool.query(QUERIES.getAllAppointmentsQuery, [userId])
   ).rows;
 
   return Promise.all(
     appointments.map(async (appointment) => {
-      const doctorResult = await client.query(QUERIES.getDoctorByIdQuery, [
+      const doctorResult = await pool.query(QUERIES.getDoctorByIdQuery, [
         appointment.doctor_id,
       ]);
       const doctor: doctorType = doctorResult.rows[0];
@@ -213,19 +213,19 @@ export const cancelAppointment = async (
 ) => {
   const cancelledOn = new Date();
 
-  await client.query(QUERIES.insertCancelAppointmentQuery, [
+  await pool.query(QUERIES.insertCancelAppointmentQuery, [
     appointmentId,
     cancelReason,
     cancelledOn,
   ]);
 
-  await client.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
+  await pool.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
 };
 
 // Automatically upating status from upcoming to status
 cron.schedule("*/10 * * * *", async () => {
   try {
-    await client.query(QUERIES.updateAppointmentPreviousStatusQuery);
+    await pool.query(QUERIES.updateAppointmentPreviousStatusQuery);
     console.log("Appointments updated successfully.");
   } catch (error) {
     console.log("Error updating appointment status:", error);

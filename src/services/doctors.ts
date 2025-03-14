@@ -1,4 +1,4 @@
-import { client } from "./db/client.js";
+import pool from "./db/client.js";
 import { QUERIES } from "./db/queries.js";
 import bcrypt from "bcrypt";
 import env from "../config.js";
@@ -17,14 +17,14 @@ import cron from "node-cron";
 
 export const getDoctorByEmail = async (email: string) => {
   const response = await (
-    await client.query(QUERIES.getDoctorByEmailQuery, [email])
+    await pool.query(QUERIES.getDoctorByEmailQuery, [email])
   ).rows[0];
   return response;
 };
 
 // All doctors
 export const getAllDoctors = async () => {
-  const doctors = (await client.query(QUERIES.getAllDoctorsQuery)).rows;
+  const doctors = (await pool.query(QUERIES.getAllDoctorsQuery)).rows;
   return doctors
     .filter((doctor) => doctor.is_profile)
     .map((doctor) => ({
@@ -52,7 +52,7 @@ export const addNewDoctor = async (
   }
   const hashedNewPassword = await bcrypt.hash(password, 10);
   try {
-    await client.query(QUERIES.addNewDoctorQuery, [
+    await pool.query(QUERIES.addNewDoctorQuery, [
       fullName,
       email,
       hashedNewPassword,
@@ -101,14 +101,14 @@ export const loginDoctor = async (email: string, password: string) => {
 
 // Doctor by Id
 export const getDoctorById = async (doctorId: number) => {
-  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
     doctorId,
   ]);
   if (!doctorExists) {
     throw new NotFound("Doctor doesn't exists");
   }
 
-  const result = (await client.query(QUERIES.getDoctorByIdQuery, [doctorId]))
+  const result = (await pool.query(QUERIES.getDoctorByIdQuery, [doctorId]))
     .rows[0];
   return {
     id: result.id,
@@ -130,7 +130,7 @@ export const updateDoctorProfile = async (
   doctor: DoctorSchema,
   doctorId: number
 ) => {
-  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
     doctorId,
   ]);
   if (!doctorExists) {
@@ -138,7 +138,7 @@ export const updateDoctorProfile = async (
   }
 
   try {
-    await client.query(QUERIES.updateDoctorProfileQuery, [
+    await pool.query(QUERIES.updateDoctorProfileQuery, [
       doctorId,
       doctor.name,
       doctor.avatarUrl,
@@ -159,7 +159,7 @@ export const insertingLeaveDates = async (
   doctorId: number,
   calendarForm: LeaveDatesSchema
 ) => {
-  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
     doctorId,
   ]);
   if (!doctorExists) {
@@ -167,7 +167,7 @@ export const insertingLeaveDates = async (
   }
 
   try {
-    await client.query(QUERIES.insertingLeaveDateQuery, [
+    await pool.query(QUERIES.insertingLeaveDateQuery, [
       calendarForm.title,
       calendarForm.description,
       calendarForm.dates,
@@ -186,7 +186,7 @@ export const insertingLeaveDates = async (
 };
 
 export const getAllLeaveDatesById = async (doctorId: number) => {
-  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
     doctorId,
   ]);
   if (!doctorExists) {
@@ -194,7 +194,7 @@ export const getAllLeaveDatesById = async (doctorId: number) => {
   }
 
   const response = (
-    await client.query(QUERIES.getAllLeaveDatesByIdQuery, [doctorId])
+    await pool.query(QUERIES.getAllLeaveDatesByIdQuery, [doctorId])
   ).rows;
   return response.map((item) => ({
     id: item.id,
@@ -208,7 +208,7 @@ export const getAllLeaveDatesById = async (doctorId: number) => {
 };
 
 export const cancelLeaveDates = async (doctorId: number, id: number) => {
-  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
     doctorId,
   ]);
   if (!doctorExists) {
@@ -216,7 +216,7 @@ export const cancelLeaveDates = async (doctorId: number, id: number) => {
   }
 
   try {
-    await client.query(QUERIES.cancelLeaveDatesQuery, [doctorId, id]);
+    await pool.query(QUERIES.cancelLeaveDatesQuery, [doctorId, id]);
   } catch (error) {
     console.log(error);
   }
@@ -225,7 +225,7 @@ export const cancelLeaveDates = async (doctorId: number, id: number) => {
 // Automatically upating status from upcoming to status
 cron.schedule("*/10 * * * *", async () => {
   try {
-    await client.query(QUERIES.updatePreviousStatusQuery);
+    await pool.query(QUERIES.updatePreviousStatusQuery);
     console.log("Leave dates updated successfully.");
   } catch (error) {
     console.log("Error updating leave dates status:", error);
