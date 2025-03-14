@@ -38,4 +38,11 @@ export const doctorSignupSchema = doctorAuthenticationSchema.extend({
   fullName: z.string().trim().min(1),
 });
 
+export const leaveDatesSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  dates: z.string(),
+});
+
 export type DoctorSchema = z.infer<typeof doctorSchema>;
+export type LeaveDatesSchema = z.infer<typeof leaveDatesSchema>;

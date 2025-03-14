@@ -12,7 +12,8 @@ import {
   PasswordNotMatch,
   UniqueConstraintViolationError,
 } from "./errors.js";
-import { DoctorSchema } from "../schema/doctor.schema.js";
+import { DoctorSchema, LeaveDatesSchema } from "../schema/doctor.schema.js";
+import cron from "node-cron";
 
 export const getDoctorByEmail = async (email: string) => {
   const response = await (
@@ -153,3 +154,80 @@ export const updateDoctorProfile = async (
     throw error;
   }
 };
+
+export const insertingLeaveDates = async (
+  doctorId: number,
+  calendarForm: LeaveDatesSchema
+) => {
+  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+    doctorId,
+  ]);
+  if (!doctorExists) {
+    throw new NotFound("Doctor doesn't exists");
+  }
+
+  try {
+    await client.query(QUERIES.insertingLeaveDateQuery, [
+      calendarForm.title,
+      calendarForm.description,
+      calendarForm.dates,
+      doctorId,
+    ]);
+  } catch (error) {
+    if (error instanceof DatabaseError) {
+      if (error.code === "23502") {
+        throw new AutoIncrementFailure(
+          "null value in column id of relation doctors violates not-null constraint"
+        );
+      }
+    }
+    console.log(error);
+  }
+};
+
+export const getAllLeaveDatesById = async (doctorId: number) => {
+  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+    doctorId,
+  ]);
+  if (!doctorExists) {
+    throw new NotFound("Doctor doesn't exists");
+  }
+
+  const response = (
+    await client.query(QUERIES.getAllLeaveDatesByIdQuery, [doctorId])
+  ).rows;
+  return response.map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    dates: item.leave_dates,
+    createdAt: item.created_at,
+    status: item.status,
+    doctorId: item.doctor_id,
+  }));
+};
+
+export const cancelLeaveDates = async (doctorId: number, id: number) => {
+  const doctorExists = await client.query(QUERIES.doctorExistsQuery, [
+    doctorId,
+  ]);
+  if (!doctorExists) {
+    throw new NotFound("Doctor doesn't exists");
+  }
+
+  try {
+    await client.query(QUERIES.cancelLeaveDatesQuery, [doctorId, id]);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// Automatically upating status from upcoming to status
+cron.schedule("*/10 * * * *", async () => {
+  try {
+    await client.query(QUERIES.updatePreviousStatusQuery);
+    console.log("Leave dates updated successfully.");
+  } catch (error) {
+    console.log("Error updating leave dates status:", error);
+  }
+});

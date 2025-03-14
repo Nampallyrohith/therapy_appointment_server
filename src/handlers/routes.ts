@@ -15,12 +15,16 @@ import {
   insertEventInfo,
   getAllAppointments,
   cancelAppointment,
+  getAvailableTimes,
 } from "../services/appointment.js";
 import { eventSchema } from "../schema/appointment.schema.js";
 import {
   addNewDoctor,
+  cancelLeaveDates,
   getAllDoctors,
+  getAllLeaveDatesById,
   getDoctorById,
+  insertingLeaveDates,
   loginDoctor,
   updateDoctorProfile,
 } from "../services/doctors.js";
@@ -28,6 +32,7 @@ import {
   doctorAuthenticationSchema,
   doctorSchema,
   doctorSignupSchema,
+  leaveDatesSchema,
 } from "../schema/doctor.schema.js";
 
 type RouteHandler = (req: Request, res: Response) => void;
@@ -130,7 +135,7 @@ router.use(
             .send({ message: "Invalid or missing date parameter." });
         }
 
-        const response = await getAvailableDates(doctorId, date);
+        const response = await getAvailableTimes(Number(doctorId), date);
         res.status(200).send({
           message: "Successfully retrieved doctor's time",
           time: response,
@@ -290,7 +295,6 @@ router.get(
   })
 );
 
-// TODO: Complete profile details of doctor
 router.put(
   "/doctor/profile-details/:doctorId",
   defineRoute(async (req, res) => {
@@ -304,6 +308,56 @@ router.put(
         res.status(400).send({ error: error.message });
       }
       res.status(500).send({ error: error });
+    }
+  })
+);
+
+router.post(
+  "/doctor/:doctorId/leaves-dates",
+  defineRoute(async (req, res) => {
+    const { doctorId } = req.params;
+    const calendarForm = leaveDatesSchema.parse(req.body);
+
+    try {
+      await insertingLeaveDates(Number(doctorId), calendarForm);
+      res.status(200).send({ message: "Inserted successfully ." });
+    } catch (e) {
+      if (e instanceof NotFound) {
+        res.status(400).send({ error: e.message });
+      }
+      res.status(500).send({ error: e });
+    }
+  })
+);
+
+router.get(
+  "/doctor/:doctorId/leaves-dates",
+  defineRoute(async (req, res) => {
+    const { doctorId } = req.params;
+
+    try {
+      const response = await getAllLeaveDatesById(Number(doctorId));
+      res
+        .status(200)
+        .send({ message: "Successfully fetched.", leaveDetails: response });
+    } catch (e) {
+      if (e instanceof NotFound) {
+        res.status(400).send({ error: e.message });
+      }
+      res.status(500).send({ error: e });
+    }
+  })
+);
+
+router.put(
+  "/doctor/:doctorId/cancel-leave-dates/:id",
+  defineRoute(async (req, res) => {
+    const { doctorId, id } = req.params;
+    try {
+      await cancelLeaveDates(Number(doctorId), Number(id));
+      res.status(200).send({ message: "Cancelled successfully." });
+    } catch (e) {
+      res.status(500).send({ error: e });
     }
   })
 );
