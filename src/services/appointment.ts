@@ -222,6 +222,10 @@ export const cancelAppointment = async (
   await pool.query(QUERIES.updateCancelStatusQuery, [appointmentId]);
 };
 
+export const CancelAppointmentFromUpcoming = async (eventId: string) => {
+  await pool.query(QUERIES.CancelAppointmentFromUpcomingQuery, [eventId]);
+};
+
 // Automatically upating status from upcoming to status
 cron.schedule("*/10 * * * *", async () => {
   try {
