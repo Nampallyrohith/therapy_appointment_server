@@ -76,11 +76,18 @@ export const QUERIES = {
   `,
 
   getAllAppointmentsQuery: `
-    SELECT a.*, ca.cancel_reason, ca.cancelled_on 
-    FROM appointments a 
-    LEFT JOIN cancelled_appointments ca 
-    ON a.id = ca.appointment_id 
-    WHERE a.user_id = $1;
+    SELECT
+      a.*,
+      ca.cancel_reason, ca.cancelled_on,
+      af.doctor_rating
+    FROM
+      appointments a 
+      LEFT JOIN cancelled_appointments ca
+        ON a.id = ca.appointment_id
+      LEFT JOIN appointment_feedback af 
+        ON a.id = af.appointment_id 
+    WHERE a.user_id = $1
+    ORDER BY a.start_time;
   `,
 
   getDoctorByIdQuery: `
@@ -103,7 +110,7 @@ export const QUERIES = {
   updateAppointmentPreviousStatusQuery: `
     UPDATE appointments
     SET status = 'previous'
-    WHERE status='upcoming' AND start_time < NOW();
+    WHERE status='upcoming' AND end_time < NOW();
   `,
 
   // TODO: Query is not working properly.
@@ -156,5 +163,26 @@ export const QUERIES = {
     SET status='cancelled'
     WHERE 
       doctor_id = $1 and id=$2;
+  `,
+  updateAttendedFlagQuery: `
+    UPDATE appointments
+    SET attended_modal_dismissed = TRUE
+    WHERE id = $1;
+  `,
+  insertAppointmentFeedbackQuery: `
+    INSERT INTO appointment_feedback (appointment_id, doctor_rating, doctor_feedback, meet_feedback) 
+    VALUES ($1, $2, $3, $4);
+  `,
+  updateAppointmentAttendedQuery: `
+    UPDATE appointments 
+    SET attended = TRUE
+    WHERE id = $1;
+  `,
+  updateAbsentReasonQuery: `
+    UPDATE appointments
+    SET
+      attended = FALSE,
+      absent_reason = $2
+    WHERE id = $1;
   `,
 };
