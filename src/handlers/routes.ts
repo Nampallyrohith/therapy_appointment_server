@@ -16,6 +16,7 @@ import {
   getAllAppointments,
   cancelAppointment,
   getAvailableTimes,
+  CancelAppointmentFromUpcoming,
   updateAttendedModalFlag,
   insertAppointmentFeedback,
   updateAbsentReason,
@@ -271,6 +272,17 @@ router.use(
           error: err,
         });
       }
+    })
+  ),
+
+  router.put(
+    "/upcoming-cancelled/cancel/:eventId",
+    defineRoute(async (req, res) => {
+      const { eventId } = req.params;
+      await CancelAppointmentFromUpcoming(eventId);
+      res.status(200).send({
+        message: "Successfully updated appointment",
+      });
     })
   )
 );

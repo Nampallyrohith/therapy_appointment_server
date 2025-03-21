@@ -107,6 +107,12 @@ export const QUERIES = {
     WHERE id = $1;
   `,
 
+  CancelAppointmentFromUpcomingQuery: `
+  UPDATE appointments 
+    SET status = 'cancelled' 
+    WHERE event_id = $1;
+  `,
+
   updateAppointmentPreviousStatusQuery: `
     UPDATE appointments
     SET status = 'previous'
