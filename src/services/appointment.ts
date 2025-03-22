@@ -193,7 +193,9 @@ export const getAllAppointments = async (userId: string) => {
         timeZone: appointment.time_zone,
         hangoutLink: appointment.hangout_link,
         status: appointment.status,
-        createdAt: new Date(appointment.created_at).toLocaleString(),
+        createdAt: `${formatDate(appointment.created_at)} ${convertUTCToIST(
+          appointment.created_at
+        )}`,
         typeOfTherapy: appointment.therapy_type,
         doctorName: doctor?.name,
         cancelledOn:
@@ -202,6 +204,9 @@ export const getAllAppointments = async (userId: string) => {
         cancelReason:
           appointment.cancel_reason !== null && appointment.cancel_reason,
         attended: appointment.attended,
+        attendedModalDismissed: appointment.attended_modal_dismissed,
+        absentReason: appointment.absent_reason,
+        doctorRating: appointment.doctor_rating,
       };
     })
   );
@@ -235,3 +240,33 @@ cron.schedule("*/10 * * * *", async () => {
     console.log("Error updating appointment status:", error);
   }
 });
+
+export const updateAttendedModalFlag = async (appointmentId: number) => {
+  await pool.query(QUERIES.updateAttendedFlagQuery, [appointmentId]);
+};
+
+export const insertAppointmentFeedback = async (
+  appointmentId: number,
+  doctorRating: number,
+  doctorFeedback: string,
+  meetFeedback: string
+) => {
+  await pool.query(QUERIES.insertAppointmentFeedbackQuery, [
+    appointmentId,
+    doctorRating,
+    doctorFeedback,
+    meetFeedback,
+  ]);
+
+  await pool.query(QUERIES.updateAppointmentAttendedQuery, [appointmentId]);
+};
+
+export const updateAbsentReason = async (
+  appointmentId: number,
+  absentReason: string
+) => {
+  await pool.query(QUERIES.updateAbsentReasonQuery, [
+    appointmentId,
+    absentReason,
+  ]);
+};
