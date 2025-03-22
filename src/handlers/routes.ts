@@ -7,6 +7,7 @@ import {
   NotFound,
   PasswordNotMatch,
   UniqueConstraintViolationError,
+  UniquePassword,
 } from "../services/errors.js";
 import {
   getAllDoctorsByTherapyId,
@@ -22,6 +23,7 @@ import { eventSchema } from "../schema/appointment.schema.js";
 import {
   addNewDoctor,
   cancelLeaveDates,
+  forgotPassword,
   getAllDoctors,
   getAllLeaveDatesById,
   getDoctorById,
@@ -33,6 +35,7 @@ import {
   doctorAuthenticationSchema,
   doctorSchema,
   doctorSignupSchema,
+  forgotPasswordSchema,
   leaveDatesSchema,
 } from "../schema/doctor.schema.js";
 
@@ -277,6 +280,34 @@ router.use(
         if (error instanceof DoctorCreationError) {
           res.status(500).send({
             error: "Something went wrong.",
+          });
+        }
+      }
+    })
+  ),
+  router.put(
+    "/forgot-password",
+    defineRoute(async (req, res) => {
+      const loginCredentials = forgotPasswordSchema.parse(req.body);
+      try {
+        await forgotPassword(loginCredentials);
+        res.status(200).send({
+          message: "Update password successfully.",
+        });
+      } catch (error) {
+        if (error instanceof NotFound) {
+          res.status(400).send({
+            error: error.message,
+          });
+        }
+        if (error instanceof PasswordNotMatch) {
+          res.status(400).send({
+            error: error.message,
+          });
+        }
+        if (error instanceof UniquePassword) {
+          res.status(400).send({
+            error: error.message,
           });
         }
       }
