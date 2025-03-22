@@ -107,24 +107,22 @@ export const loginDoctor = async (email: string, password: string) => {
 export const forgotPassword = async (
   loginCredentials: ForgotPasswordSchema
 ) => {
-  const { email, oldPassword, newPasword } = loginCredentials;
+  const { email, oldPassword, newPassword } = loginCredentials;
   const doctor = await getDoctorByEmail(email);
   if (!doctor) {
     console.log("Doctor doesn't exist.");
     throw new NotFound("Doctor doesn't exist. Please create an account.");
   }
 
+  const checkOldPassword = await bcrypt.compare(oldPassword, doctor.password);
+  if (!checkOldPassword) {
+    throw new PasswordNotMatch("Invalid old password");
+  }
+  if (oldPassword === newPassword) {
+    throw new UniquePassword("New password should not match with Old password");
+  }
   try {
-    const checkOldPassword = await bcrypt.compare(oldPassword, doctor.password);
-    if (!checkOldPassword) {
-      throw new PasswordNotMatch("Password doesn't match");
-    }
-    if (oldPassword === newPasword) {
-      throw new UniquePassword(
-        "New password should not match with Old password"
-      );
-    }
-    const newHashPassword = await bcrypt.hash(newPasword, 10);
+    const newHashPassword = await bcrypt.hash(newPassword, 10);
     await pool.query(QUERIES.updateForgotPassword, [email, newHashPassword]);
   } catch (error) {}
 };

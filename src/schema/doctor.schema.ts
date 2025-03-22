@@ -47,7 +47,7 @@ export const leaveDatesSchema = z.object({
 export const forgotPasswordSchema = z.object({
   email: z.string().trim().min(1).email(),
   oldPassword: z.string().trim().min(1),
-  newPasword: z.string().trim().min(1),
+  newPassword: z.string().trim().min(1),
 });
 
 export type DoctorSchema = z.infer<typeof doctorSchema>;
