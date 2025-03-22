@@ -44,5 +44,13 @@ export const leaveDatesSchema = z.object({
   dates: z.string(),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().min(1).email(),
+  oldPassword: z.string().trim().min(1),
+  newPasword: z.string().trim().min(1),
+});
+
 export type DoctorSchema = z.infer<typeof doctorSchema>;
 export type LeaveDatesSchema = z.infer<typeof leaveDatesSchema>;
+
+export type ForgotPasswordSchema = z.infer<typeof forgotPasswordSchema>;

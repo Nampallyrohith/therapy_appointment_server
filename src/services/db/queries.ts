@@ -163,4 +163,10 @@ export const QUERIES = {
     WHERE 
       doctor_id = $1 and id=$2;
   `,
+  updateForgotPassword: `
+  UPDATE doctors
+  SET password=$2
+  WHERE
+    email=$1;
+  `,
 };
