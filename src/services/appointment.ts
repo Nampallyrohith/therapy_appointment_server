@@ -152,21 +152,6 @@ export const insertEventInfo = async (
     )
   );
 
-  const appointmentEndTime = new Date(result.rows[0].end_time);
-  const now = new Date();
-  // FIXME: It's updating the status at start_time instead of end_time for some reason,
-  // So I manually added 1 hour in delay to get it right :(
-  const delay = appointmentEndTime.getTime() + 60 * 60 * 1000 - now.getTime();
-
-  if (delay > 0) {
-    setTimeout(
-      async () =>
-        await pool.query(QUERIES.updateAppointmentPreviousStatusQuery),
-      delay
-    );
-  } else {
-    await pool.query(QUERIES.updateAppointmentPreviousStatusQuery);
-  }
   return true;
 };
 
@@ -247,14 +232,14 @@ export const CancelAppointmentFromUpcoming = async (eventId: string) => {
 };
 
 // Automatically upating status from upcoming to status
-// cron.schedule("*/10 * * * *", async () => {
-//   try {
-//     await pool.query(QUERIES.updateAppointmentPreviousStatusQuery);
-//     console.log("Appointments updated successfully.");
-//   } catch (error) {
-//     console.log("Error updating appointment status:", error);
-//   }
-// });
+cron.schedule("*/10 * * * *", async () => {
+  try {
+    await pool.query(QUERIES.updateAppointmentPreviousStatusQuery);
+    console.log("Appointments updated successfully.");
+  } catch (error) {
+    console.log("Error updating appointment status:", error);
+  }
+});
 
 export const updateAttendedModalFlag = async (appointmentId: number) => {
   await pool.query(QUERIES.updateAttendedFlagQuery, [appointmentId]);

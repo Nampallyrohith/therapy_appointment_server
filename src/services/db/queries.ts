@@ -61,7 +61,7 @@ export const QUERIES = {
     ) 
     VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
-    ) RETURNING id;
+    ) RETURNING id, end_time;
   `,
 
   insertAppointmentAttendeesQuery: `
@@ -116,7 +116,7 @@ export const QUERIES = {
   updateAppointmentPreviousStatusQuery: `
     UPDATE appointments
     SET status = 'previous'
-    WHERE status='upcoming' AND end_time < NOW();
+    WHERE status = 'upcoming' AND end_time <= NOW() + INTERVAL '10 minutes';
   `,
 
   // TODO: Query is not working properly.
