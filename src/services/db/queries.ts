@@ -191,4 +191,10 @@ export const QUERIES = {
       absent_reason = $2
     WHERE id = $1;
   `,
+  updateForgotPassword: `
+  UPDATE doctors
+  SET password=$2
+  WHERE
+    email=$1;
+  `,
 };

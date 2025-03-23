@@ -11,8 +11,13 @@ import {
   NotFound,
   PasswordNotMatch,
   UniqueConstraintViolationError,
+  UniquePassword,
 } from "./errors.js";
-import { DoctorSchema, LeaveDatesSchema } from "../schema/doctor.schema.js";
+import {
+  DoctorSchema,
+  ForgotPasswordSchema,
+  LeaveDatesSchema,
+} from "../schema/doctor.schema.js";
 import cron from "node-cron";
 
 export const getDoctorByEmail = async (email: string) => {
@@ -99,11 +104,32 @@ export const loginDoctor = async (email: string, password: string) => {
   };
 };
 
+export const forgotPassword = async (
+  loginCredentials: ForgotPasswordSchema
+) => {
+  const { email, oldPassword, newPassword } = loginCredentials;
+  const doctor = await getDoctorByEmail(email);
+  if (!doctor) {
+    console.log("Doctor doesn't exist.");
+    throw new NotFound("Doctor doesn't exist. Please create an account.");
+  }
+
+  const checkOldPassword = await bcrypt.compare(oldPassword, doctor.password);
+  if (!checkOldPassword) {
+    throw new PasswordNotMatch("Invalid old password");
+  }
+  if (oldPassword === newPassword) {
+    throw new UniquePassword("New password should not match with Old password");
+  }
+  try {
+    const newHashPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query(QUERIES.updateForgotPassword, [email, newHashPassword]);
+  } catch (error) {}
+};
+
 // Doctor by Id
 export const getDoctorById = async (doctorId: number) => {
-  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
-    doctorId,
-  ]);
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [doctorId]);
   if (!doctorExists) {
     throw new NotFound("Doctor doesn't exists");
   }
@@ -130,9 +156,7 @@ export const updateDoctorProfile = async (
   doctor: DoctorSchema,
   doctorId: number
 ) => {
-  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
-    doctorId,
-  ]);
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [doctorId]);
   if (!doctorExists) {
     throw new NotFound("Doctor doesn't exists");
   }
@@ -159,9 +183,7 @@ export const insertingLeaveDates = async (
   doctorId: number,
   calendarForm: LeaveDatesSchema
 ) => {
-  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
-    doctorId,
-  ]);
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [doctorId]);
   if (!doctorExists) {
     throw new NotFound("Doctor doesn't exists");
   }
@@ -186,9 +208,7 @@ export const insertingLeaveDates = async (
 };
 
 export const getAllLeaveDatesById = async (doctorId: number) => {
-  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
-    doctorId,
-  ]);
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [doctorId]);
   if (!doctorExists) {
     throw new NotFound("Doctor doesn't exists");
   }
@@ -208,9 +228,7 @@ export const getAllLeaveDatesById = async (doctorId: number) => {
 };
 
 export const cancelLeaveDates = async (doctorId: number, id: number) => {
-  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [
-    doctorId,
-  ]);
+  const doctorExists = await pool.query(QUERIES.doctorExistsQuery, [doctorId]);
   if (!doctorExists) {
     throw new NotFound("Doctor doesn't exists");
   }
