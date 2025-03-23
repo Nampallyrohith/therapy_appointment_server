@@ -193,9 +193,9 @@ export const getAllAppointments = async (userId: string) => {
         timeZone: appointment.time_zone,
         hangoutLink: appointment.hangout_link,
         status: appointment.status,
-        createdAt: `${formatDate(appointment.created_at)} ${convertUTCToIST(
-          appointment.created_at
-        )}`,
+        createdAt: appointment.created_at.toLocaleString("en-US", {
+          timeZone: "Asia/Kolkata",
+        }),
         typeOfTherapy: appointment.therapy_type,
         doctorName: doctor?.name,
         cancelledOn:
