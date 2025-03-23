@@ -18,6 +18,9 @@ import {
   cancelAppointment,
   getAvailableTimes,
   CancelAppointmentFromUpcoming,
+  updateAttendedModalFlag,
+  insertAppointmentFeedback,
+  updateAbsentReason,
 } from "../services/appointment.js";
 import { eventSchema } from "../schema/appointment.schema.js";
 import {
@@ -183,8 +186,74 @@ router.use(
           res.status(500).json({ error: "Failed to cancel appointment" });
         }
       })
+    ),
+
+    router.post(
+      "/:appointmentId/update-attended-modal-flag",
+      defineRoute(async (req, res) => {
+        try {
+          const { appointmentId } = req.params;
+
+          await updateAttendedModalFlag(parseInt(appointmentId));
+
+          res.status(200).json({
+            message: "Attended modal has be dismissed successfully",
+          });
+        } catch (error) {
+          console.log(error);
+          res
+            .status(500)
+            .json({ error: "Failed to update attended modal flag" });
+        }
+      })
+    ),
+
+    router.post(
+      "/:appointmentId/submit-feedback",
+      defineRoute(async (req, res) => {
+        try {
+          const { appointmentId } = req.params;
+          const { doctorRating, doctorFeedback, meetFeedback } = req.body;
+
+          await insertAppointmentFeedback(
+            parseInt(appointmentId),
+            doctorRating,
+            doctorFeedback,
+            meetFeedback
+          );
+
+          res.status(200).json({
+            message: "Appointment feedback updated successfully",
+          });
+        } catch (error) {
+          console.log(error);
+          res
+            .status(500)
+            .json({ error: "Failed to post appointment feedback" });
+        }
+      })
+    ),
+
+    router.post(
+      "/:appointmentId/submit-absent-reason",
+      defineRoute(async (req, res) => {
+        try {
+          const { appointmentId } = req.params;
+          const { absentReason } = req.body;
+
+          await updateAbsentReason(parseInt(appointmentId), absentReason);
+
+          res.status(200).json({
+            message: "Absent reason updated successfully",
+          });
+        } catch (error) {
+          console.log(error);
+          res.status(500).json({ error: "Failed to post absent reason" });
+        }
+      })
     )
   ),
+
   router.get(
     "/my-appointments/:googleUserId",
     defineRoute(async (req, res) => {

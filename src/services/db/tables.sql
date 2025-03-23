@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS doctors_leave_date (
     description text,
     leave_dates text,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status status_enum default 'upcoming',
+    status status_enum default 'upcoming'
 );
 
 CREATE TABLE IF NOT EXISTS appointments (
@@ -84,7 +84,9 @@ CREATE TABLE IF NOT EXISTS appointments (
     status status_enum not null default 'upcoming',
     created_at TIMESTAMP not null,
     therapy_type TEXT not null,
-    attended BOOLEAN
+    attended BOOLEAN,
+    attended_modal_dismissed BOOLEAN default false,
+    absent_reason TEXT
 );
 
 CREATE TABLE IF NOT EXISTS cancelled_appointments(
@@ -104,6 +106,7 @@ CREATE TABLE IF NOT EXISTS appointments_attendees(
 CREATE TABLE IF NOT EXISTS appointment_feedback (
     id SERIAL PRIMARY KEY,
     appointment_id INTEGER not null references appointments(id) on delete cascade,
-    rating INTEGER not null,
-    review TEXT not null
+    doctor_rating INTEGER not null,
+    doctor_feedback TEXT not null,
+    meet_feedback TEXT not null
 )
