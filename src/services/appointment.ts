@@ -198,6 +198,7 @@ export const getAllAppointments = async (userId: string) => {
         }),
         typeOfTherapy: appointment.therapy_type,
         doctorName: doctor?.name,
+        doctorAvatarUrl: doctor.avatar_url,
         cancelledOn:
           appointment.cancelled_on !== null &&
           new Date(appointment.cancelled_on).toLocaleString(),
