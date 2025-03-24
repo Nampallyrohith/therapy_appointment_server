@@ -8,15 +8,26 @@ import morgan from "morgan";
 const app = express();
 
 const PORT = env.PORT;
-const corsOptions = {
-  origin: env.CORS_ALLOWED_ORIGIN as string, // Read from .env or use default
-  credentials: true, // Allow cookies
+const corsOptions: cors.CorsOptions = {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
+    const allowedOrigins = env.CORS_ALLOWED_ORIGIN.split(",");
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 };
+
 app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(morgan("dev"));
-
 
 // Use the imported routes
 app.use("/api", routes);
