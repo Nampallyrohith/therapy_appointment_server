@@ -240,12 +240,12 @@ export const cancelLeaveDates = async (doctorId: number, id: number) => {
   }
 };
 
-// Automatically upating status from upcoming to status
-cron.schedule("*/10 * * * *", async () => {
-  try {
-    await pool.query(QUERIES.updatePreviousStatusQuery);
-    console.log("Leave dates updated successfully.");
-  } catch (error) {
-    console.log("Error updating leave dates status:", error);
-  }
-});
+// // Automatically upating status from upcoming to status
+// cron.schedule("*/10 * * * *", async () => {
+//   try {
+//     await pool.query(QUERIES.updatePreviousStatusQuery);
+//     console.log("Leave dates updated successfully.");
+//   } catch (error) {
+//     console.log("Error updating leave dates status:", error);
+//   }
+// });

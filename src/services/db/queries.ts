@@ -119,17 +119,17 @@ export const QUERIES = {
     WHERE status = 'upcoming' AND end_time <= NOW() + INTERVAL '10 minutes';
   `,
 
-  // TODO: Query is not working properly.
-  updatePreviousStatusQuery: `
-    UPDATE doctors_leave_date
-    SET status = 'previous'
-    WHERE status = 'upcoming'
-    AND EXISTS (
-        SELECT 1
-        FROM jsonb_array_elements_text(leave_dates::jsonb) AS leave_date
-        WHERE leave_date::DATE < CURRENT_DATE
-    );
-  `,
+  // // TODO: Query is not working properly.
+  // updatePreviousStatusQuery: `
+  //   UPDATE doctors_leave_date
+  //   SET status = 'previous'
+  //   WHERE status = 'upcoming'
+  //   AND EXISTS (
+  //       SELECT 1
+  //       FROM jsonb_array_elements_text(leave_dates::jsonb) AS leave_date
+  //       WHERE leave_date::DATE < CURRENT_DATE
+  //   );
+  // `,
 
   addNewDoctorQuery: `
     INSERT INTO doctors (name, email, password) 
