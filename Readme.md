@@ -1,7 +1,5 @@
+This repo contains the backend logic of `Therahub` - a therapy appointment application.
 
-##commands to pull postgres and setup:
-###Run this commands in terminal
+Check the below repo for `detailed documentation` of the application and its code repositories
 
-
- - docker volume create therapy-appointment-db
- - docker run --name therapy -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -v therapy-appointment-db -d postgres
+<a href="https://github.com/Nampallyrohith/therapy_appointment_web" target="_blank">Base User Portal Repo</a>
